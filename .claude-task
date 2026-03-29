@@ -1,0 +1,39 @@
+# Arab Tycoon Simulator - Build Task
+
+## Mission
+Build the complete Arab Tycoon Simulator game as a single HTML file.
+
+## Context
+This is a H5 game for WhatsApp browser. Vue 3 CDN (no build step). Mobile-first 360-480px.
+
+## Steps
+1. Read these files to understand requirements:
+   - ARCHITECTURE.md
+   - UI_SPEC.md
+   - GAME_DATA.md
+   - CODING_STANDARDS.md
+
+2. Create src/index.html - the COMPLETE working game in Vue 3 CDN, single HTML file:
+   - Start screen with title and "Start Game" button
+   - Main game UI with 3 tabs: Home, Leaderboard, Friends
+   - Home tab: show total assets (AED), identity level, cash; 3 earn buttons: Work (+1000 AED, 1min CD), Business (+10000 AED, 10min CD), Invest (+1M AED, 60min CD, 50%/50% win/lose)
+   - Shop tab: categories (Cars/Homes/Pets/Luxury), items with prices, buy button
+   - Leaderboard: fake leaderboard with 10 preset players + player
+   - Friends: 5 preset friends with visit/gift/PK buttons
+   - Identity levels: Peasant(0) → Small Boss(1M) → Rich Merchant(100M) → Tycoon(1B) → Middle East King(100B)
+   - localStorage save/load
+   - Gold #D4AF37, dark brown #2C1E0F, black bg, white text
+   - WhatsApp browser compatible (no WebSocket, no ES6 modules)
+
+3. Create src/items.js - game items data exported as JS objects (cars, homes, pets, luxury from GAME_DATA.md)
+
+4. Create src/i18n.js - internationalization with English strings (prepare for Arabic later)
+
+5. Commit all changes with message: "feat: complete game MVP - single HTML file with Vue 3 CDN"
+
+## Rules
+- Single HTML file (src/index.html) must be fully playable standalone
+- No external images (use emoji/icons from CDN or inline SVG)
+- All prices and game data from GAME_DATA.md
+- Every button must work
+- Save to localStorage on every action

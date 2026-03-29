@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>阿拉伯土豪模拟器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F0D060;
+      --brown: #2C1E0F;
+      --brown-light: #4A3520;
+      --bg: #0a0a0a;
+      --bg-card: #141210;
+      --bg-card2: #1e1a14;
+      --text: #f5f0e8;
+      --text-dim: #a09080;
+      --green: #4caf50;
+      --blue: #42a5f5;
+      --purple: #ab47bc;
+      --gray: #9e9e9e;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Arabic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--brown-light); border-radius: 2px; }
+
+    /* ========== START SCREEN ========== */
+    .start-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+      background: radial-gradient(ellipse at top, #1a1208 0%, var(--bg) 70%);
+    }
+
+    .start-logo {
+      font-size: 56px;
+      margin-bottom: 12px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .start-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 1px;
+      text-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .start-sub {
+      font-size: 15px;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+      border: none;
+      padding: 16px 48px;
+      font-size: 18px;
+      font-weight: 800;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-gold:active { transform: scale(0.97); }
+
+    .start-dunes {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(to top, #1a1008, transparent);
+      pointer-events: none;
+    }
+
+    /* ========== GAME SCREEN ========== */
+    .game-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .game-header {
+      background: var(--brown);
+      padding: 12px 16px 10px;
+      border-bottom: 2px solid var(--gold);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .back-btn:hover { background: rgba(212, 175, 55, 0.1); }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      flex: 1;
+      text-align: center;
+    }
+
+    .header-spacer { width: 36px; }
+
+    /* Status Bar */
+    .status-bar {
+      background: var(--bg-card2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .status-row:last-child { margin-bottom: 0; }
+
+    .status-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .status-value {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .status-value.cash { color: var(--green); font-size: 14px; }
+
+    .identity-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-peasant { background: #424242; color: #bdbdbd; }
+    .badge-smallboss { background: #1b5e20; color: #a5d6a7; }
+    .badge-richmerchant { background: #0d47a1; color: #90caf9; }
+    .badge-tycoon { background: #4a148c; color: #ce93d8; }
+    .badge-king { background: #5d4000; color: var(--gold-light); border: 1px solid var(--gold); }
+
+    /* Level Progress */
+    .level-progress-section {
+      margin: 10px 16px;
+    }
+
+    .level-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .level-bar-wrap {
+      background: #2a2018;
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .level-bar {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: var(--bg-card);
+      border-bottom: 1px solid #2a2018;
+      margin: 0 16px;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* Content Area */
+    .tab-content {
+      flex: 1;
+      padding: 14px 16px;
+      overflow-y: auto;
+    }
+
+    /* Home Tab */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      margin-top: 6px;
+    }
+
+    .earn-grid {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .earn-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .earn-btn:active { transform: scale(0.98); }
+    .earn-btn.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .earn-icon { font-size: 28px; flex-shrink: 0; }
+
+    .earn-info { flex: 1; }
+
+    .earn-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .earn-reward {
+      font-size: 12px;
+      color: var(--green);
+      margin-top: 2px;
+    }
+
+    .earn-cooldown {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .earn-action {
+      background: var(--brown-light);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .earn-action:hover { background: var(--brown); }
+    .earn-action.cooldown-btn {
+      background: #2a2018;
+      color: var(--text-dim);
+      border-color: #3a2e1e;
+      cursor: not-allowed;
+    }
+
+    /* Owned Items */
+    .owned-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 80px;
+    }
+
+    .owned-item {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .owned-item .item-icon { font-size: 18px; }
+    .owned-item .item-name { font-size: 11px; font-weight: 600; }
+
+    .empty-msg {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    /* Shop Button */
+    .shop-btn-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: var(--brown);
+      border-top: 1px solid #3a2e1e;
+      padding: 12px 16px;
+      z-index: 20;
+    }
+
+    .btn-shop-main {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+      border: none;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* ========== SHOP ========== */
+    .shop-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-tabs {
+      display: flex;
+      background: var(--bg-card);
+      border-bottom: 1px solid #2a2018;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .shop-tab {
+      padding: 12px 16px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .shop-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    .shop-list {
+      flex: 1;
+      padding: 12px 14px;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+
+    .shop-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 8px;
+    }
+
+    .shop-item-icon { font-size: 32px; flex-shrink: 0; }
+
+    .shop-item-info { flex: 1; }
+
+    .shop-item-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .shop-item-price {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .shop-buy-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-buy {
+      background: var(--gold);
+      color: var(--brown);
+    }
+
+    .btn-buy:active { transform: scale(0.95); }
+
+    .btn-owned {
+      background: #2a3a2a;
+      color: #6caf6c;
+      cursor: default;
+    }
+
+    .btn-cant {
+      background: #2a2a2a;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    /* ========== LEADERBOARD ========== */
+    .lb-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    }
+
+    .lb-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .lb-tab.active {
+      background: var(--gold);
+      color: var(--brown);
+      border-color: var(--gold);
+    }
+
+    .lb-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .lb-row.is-you {
+      border-color: var(--gold);
+      background: #1e1a10;
+    }
+
+    .lb-rank {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-dim);
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .lb-rank.gold { color: var(--gold); }
+    .lb-rank.silver { color: #c0c0c0; }
+    .lb-rank.bronze { color: #cd7f32; }
+
+    .lb-emoji { font-size: 24px; flex-shrink: 0; }
+
+    .lb-info { flex: 1; min-width: 0; }
+
+    .lb-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lb-badge-small {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-top: 3px;
+    }
+
+    .lb-assets {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* ========== FRIENDS ========== */
+    .friends-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .friend-card {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .friend-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .friend-avatar { font-size: 36px; }
+
+    .friend-info { flex: 1; }
+
+    .friend-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .friend-assets {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .friend-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .friend-action-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .btn-visit {
+      background: #1a2a3a;
+      border-color: #3a6a9a;
+      color: #7ab8e8;
+    }
+
+    .btn-gift {
+      background: #2a1a3a;
+      border-color: #7a4aaa;
+      color: #b87ae8;
+    }
+
+    .btn-pk {
+      background: #2a1a1a;
+      border-color: #9a3a3a;
+      color: #e87a7a;
+    }
+
+    .friend-action-btn:active { transform: scale(0.96); }
+
+    /* ========== MODAL ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .modal-icon { font-size: 48px; margin-bottom: 12px; }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .modal-text {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .modal-btn:active { transform: scale(0.97); }
+
+    .modal-btn-confirm {
+      background: var(--gold);
+      color: var(--brown);
+    }
+
+    .modal-btn-cancel {
+      background: #2a2a2a;
+      color: var(--text);
+      border: 1px solid #3a3a3a;
+    }
+
+    .modal-btn-ok {
+      background: var(--gold);
+      color: var(--brown);
+      width: 100%;
+    }
+
+    .modal-result {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .result-win { color: var(--gold); }
+    .result-lose { color: #e87a7a; }
+
+    /* Gift selection */
+    .gift-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .gift-option {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .gift-option:active { transform: scale(0.97); }
+    .gift-option.disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .gift-option-icon { font-size: 28px; }
+    .gift-option-name { font-size: 11px; font-weight: 600; color: var(--text); margin-top: 4px; }
+    .gift-option-price { font-size: 11px; color: var(--gold); margin-top: 2px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--brown-light);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 200;
+      animation: toastIn 0.3s ease;
+      white-space: nowrap;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .toast-success { border-color: var(--green); color: var(--green); }
+    .toast-error { border-color: #e87a7a; color: #e87a7a; }
+
+    /* ========== RTL SUPPORT ========== */
+    [dir="rtl"] body { direction: rtl; }
+    [dir="rtl"] .tabs { flex-direction: row-reverse; }
+    [dir="rtl"] .header-top { flex-direction: row-reverse; }
+    [dir="rtl"] .status-row { flex-direction: row-reverse; }
+    [dir="rtl"] .earn-btn { flex-direction: row-reverse; }
+    [dir="rtl"] .shop-item { flex-direction: row-reverse; }
+    [dir="rtl"] .friend-top { flex-direction: row-reverse; }
+    [dir="rtl"] .lb-row { flex-direction: row-reverse; }
+    [dir="rtl"] .back-btn { transform: scaleX(-1); }
+    [dir="rtl"] .toast { transform: translateX(50%); }
+    [dir="rtl"] .toast { left: 50%; right: auto; }
+    [dir="rtl"] @keyframes toastIn { from { opacity: 0; transform: translateX(50%) translateY(10px); } to { opacity: 1; transform: translateX(50%) translateY(0); } }
+
+    /* Language switcher */
+    .lang-switch {
+      display: flex;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--bg-card2);
+      border-radius: 15px;
+      margin-left: auto;
+    }
+    .lang-btn {
+      padding: 3px 8px;
+      border: none;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-dim);
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: var(--gold);
+      color: var(--brown);
+    }
+
+    /* ========== SHARE POSTER ========== */
+    .share-poster-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 150;
+      padding: 20px;
+    }
+
+    .share-poster-preview {
+      max-width: 280px;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+      margin-bottom: 16px;
+    }
+
+    .share-poster-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .share-action-btn {
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.15s;
+    }
+
+    .share-action-btn:active { transform: scale(0.96); }
+
+    .btn-whatsapp {
+      background: #25D366;
+      color: white;
+    }
+
+    .btn-download {
+      background: var(--gold);
+      color: var(--brown);
+    }
+
+    .btn-close-share {
+      background: #333;
+      color: white;
+    }
+
+    /* ========== GIFT ANIMATION ========== */
+    .gift-animation-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 300;
+      overflow: hidden;
+    }
+
+    .gift-particle {
+      position: absolute;
+      font-size: 32px;
+      animation: giftFall 2s ease-out forwards;
+    }
+
+    @keyframes giftFall {
+      0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .gift-notification {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #2a1a3a, #1a1a2a);
+      border: 2px solid #7a4aaa;
+      border-radius: 16px;
+      padding: 14px 20px;
+      z-index: 250;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: notifSlide 0.4s ease;
+      max-width: 90%;
+    }
+
+    @keyframes notifSlide {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .notif-icon { font-size: 28px; }
+    .notif-text { font-size: 13px; color: #b87ae8; font-weight: 600; }
+
+    /* ========== PK MATCHMAKING ========== */
+    .pk-match-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .pk-match-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    .pk-spinner {
+      width: 80px;
+      height: 80px;
+      border: 4px solid #333;
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .pk-match-text {
+      font-size: 16px;
+      color: var(--text-dim);
+    }
+
+    .pk-vs-display {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .pk-player-card {
+      text-align: center;
+      background: var(--bg-card2);
+      border: 2px solid var(--gold);
+      border-radius: 16px;
+      padding: 20px;
+      min-width: 120px;
+    }
+
+    .pk-player-emoji { font-size: 48px; margin-bottom: 8px; }
+    .pk-player-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .pk-player-assets { font-size: 14px; color: var(--gold); font-weight: 600; }
+
+    .pk-vs { font-size: 36px; font-weight: 900; color: var(--gold); }
+
+    .pk-result-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .pk-result-effect {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: resultPop 0.5s ease;
+    }
+
+    @keyframes resultPop {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .pk-result-title {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .pk-result-win { color: var(--gold); }
+    .pk-result-lose { color: #e87a7a; }
+
+    .pk-result-assets {
+      font-size: 18px;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+
+    .close-pk-btn {
+      padding: 14px 40px;
+      background: var(--gold);
+      color: var(--brown);
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ========== AI OPPONENTS FOR PK ========== */
+    .ai-opponent-card {
+      background: var(--bg-card2);
+      border: 2px solid #3a2a4a;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ai-opponent-info { flex: 1; }
+    .ai-opponent-name { font-size: 15px; font-weight: 700; color: var(--text); }
+    .ai-opponent-assets { font-size: 12px; color: var(--gold); margin-top: 3px; }
+
+    .btn-challenge {
+      padding: 8px 16px;
+      background: #9a3a3a;
+      color: #e87a7a;
+      border: 1px solid #e87a7a;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-challenge:active { transform: scale(0.96); }
+
+    .multiplayer-section { margin-top: 15px; }
+    .section-divider {
+      border-top: 1px solid #3a2e1e;
+      margin: 15px 0;
+    }
+
+    /* ========== TERRITORY / LORD SYSTEM ========== */
+    .territory-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .territory-card {
+      background: var(--bg-card2);
+      border: 2px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .territory-card:active { transform: scale(0.97); }
+    .territory-card.owned {
+      border-color: var(--gold);
+      background: #1e1a10;
+    }
+
+    .territory-icon { font-size: 36px; margin-bottom: 6px; }
+    .territory-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .territory-price { font-size: 11px; color: var(--gold); }
+    .territory-income { font-size: 10px; color: var(--green); margin-top: 3px; }
+    .territory-owned-badge {
+      background: var(--gold);
+      color: var(--brown);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .lord-title-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .lord-commoner { background: #424242; color: #bdbdbd; }
+    .lord-sheikh { background: #1b5e20; color: #a5d6a7; }
+    .lord-emir { background: #0d47a1; color: #90caf9; }
+    .lord-king { background: #4a148c; color: #ce93d8; }
+    .lord-emperor { background: linear-gradient(90deg, #FFD700, #FFA500, #FF6347, #FFD700); color: #000; }
+
+    .territory-stats {
+      display: flex;
+      justify-content: space-around;
+      background: var(--bg-card2);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+
+    .territory-stat {
+      text-align: center;
+    }
+
+    .territory-stat-value { font-size: 18px; font-weight: 800; color: var(--gold); }
+    .territory-stat-label { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+    /* ========== DAILY SIGNIN ========== */
+    .signin-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin: 15px 0;
+    }
+
+    .signin-day {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 8px;
+      padding: 10px 4px;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .signin-day.checked {
+      background: #1a3a1a;
+      border-color: var(--green);
+    }
+
+    .signin-day.today {
+      border-color: var(--gold);
+      background: #2a2a10;
+    }
+
+    .signin-day-icon { font-size: 20px; }
+    .signin-day-label { font-size: 9px; color: var(--text-dim); margin-top: 3px; }
+    .signin-reward { font-size: 10px; color: var(--green); margin-top: 2px; }
+
+    /* ========== CHARITY SYSTEM ========== */
+    .charity-section {
+      background: linear-gradient(135deg, #1a2a3a, #1a1a2a);
+      border: 1px solid #3a6a9a;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 15px 0;
+    }
+
+    .charity-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .charity-options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .charity-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid;
+      text-align: center;
+    }
+
+    .charity-btn.small { background: #1a3a1a; border-color: #3a6a3a; color: #7ab87a; }
+    .charity-btn.medium { background: #3a2a1a; border-color: #9a6a3a; color: #e8b87a; }
+    .charity-btn.large { background: #3a1a1a; border-color: #9a3a3a; color: #e87a7a; }
+
+    .charity-btn:active { transform: scale(0.96); }
+
+    .charity-result {
+      margin-top: 12px;
+      padding: 10px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--gold);
+      text-align: center;
+    }
+
+    .charity-bonus {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--green);
+      margin-top: 6px;
+    }
+
+    /* ========== PROPERTY RENTAL INCOME ========== */
+    .rental-section {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+
+    .rental-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .rental-title { font-size: 13px; font-weight: 700; color: var(--gold); }
+    .rental-toggle {
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+    }
+
+    .rental-toggle.on { background: var(--green); color: white; }
+    .rental-toggle.off { background: #444; color: #888; }
+
+    .rental-income {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .rental-amount {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    /* ========== FRIEND PROFILE ========== */
+    .friend-profile {
+      min-height: 100vh;
+      background: var(--bg);
+      padding-bottom: 20px;
+    }
+
+    .friend-profile-header {
+      background: var(--brown);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .friend-profile-avatar { font-size: 64px; margin-bottom: 10px; }
+    .friend-profile-name { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 5px; }
+    .friend-profile-level { font-size: 12px; color: var(--text-dim); }
+
+    .friend-profile-stats {
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
+      background: var(--bg-card2);
+      margin: 10px;
+      border-radius: 12px;
+    }
+
+    .friend-stat { text-align: center; }
+    .friend-stat-value { font-size: 16px; font-weight: 800; color: var(--gold); }
+    .friend-stat-label { font-size: 10px; color: var(--text-dim); }
+
+    .friend-inventory-section {
+      padding: 10px;
+    }
+
+    .friend-inventory-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .friend-inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .friend-inventory-item {
+      background: var(--bg-card2);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .friend-inventory-icon { font-size: 28px; }
+    .friend-inventory-name { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+    .like-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .like-btn:active { transform: scale(0.97); }
+    .like-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+    /* ========== LORD RANKS ========== */
+    .lord-ranks-section {
+      margin: 15px 0;
+    }
+
+    .lord-rank-card {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lord-rank-card.current {
+      border-color: var(--gold);
+      background: #1e1a10;
+    }
+
+    .lord-rank-icon { font-size: 32px; }
+    .lord-rank-info { flex: 1; }
+    .lord-rank-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .lord-rank-req { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .lord-rank-reward { font-size: 10px; color: var(--green); margin-top: 2px; }
+    .lord-rank-status {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .lord-rank-status.unlocked { background: var(--green); color: white; }
+    .lord-rank-status.locked { background: #444; color: #888; }
+
+    /* ========== WEALTH CHART ========== */
+    .wealth-chart-section {
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .wealth-chart-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .wealth-chart-container {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      background: #1a1510;
+      border-radius: 8px;
+      padding: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .wealth-bar {
+      flex: 1;
+      background: linear-gradient(to top, var(--gold), var(--gold-light));
+      border-radius: 3px 3px 0 0;
+      min-width: 8px;
+      transition: height 0.3s ease;
+      position: relative;
+    }
+    .wealth-bar:hover {
+      background: linear-gradient(to top, #FFD700, #FFF0A0);
+    }
+    .wealth-bar::after {
+      content: attr(data-value);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: var(--gold);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .wealth-bar:hover::after { opacity: 1; }
+
+    /* ========== NUMBER ROLLING ANIMATION ========== */
+    .rolling-number {
+      display: inline-block;
+      transition: transform 0.1s, opacity 0.1s;
+    }
+    .rolling-number.updating {
+      animation: rollUp 0.3s ease-out;
+    }
+    .rolling-number.downdating {
+      animation: rollDown 0.3s ease-out;
+    }
+    @keyframes rollUp {
+      0% { transform: translateY(100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes rollDown {
+      0% { transform: translateY(-100%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Pulse effect for money gain */
+    .money-pulse {
+      animation: moneyPulse 0.5s ease-out;
+    }
+    @keyframes moneyPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); color: #4caf50; }
+      100% { transform: scale(1); }
+    }
+
+    /* ========== SOUND TOGGLE ========== */
+    .sound-toggle {
+      position: fixed;
+      top: 12px;
+      right: 50px;
+      z-index: 100;
+      background: var(--bg-card2);
+      border: 1px solid #3a2e1e;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sound-toggle:hover {
+      background: var(--brown-light);
+      border-color: var(--gold);
+    }
+    .sound-toggle.muted { opacity: 0.5; }
+
+    /* ========== AI ADVISOR ========== */
+    .ai-advisor-section {
+      background: linear-gradient(135deg, #1a2a3a 0%, #0a1520 100%);
+      border: 1px solid #3a5a7a;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .ai-advisor-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .ai-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #42a5f5, #1976d2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .ai-info { flex: 1; }
+    .ai-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .ai-status {
+      font-size: 10px;
+      color: var(--green);
+    }
+    .ai-advice-list { display: flex; flex-direction: column; gap: 8px; }
+    .ai-advice-item {
+      background: rgba(66, 165, 245, 0.1);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .ai-advice-item:hover {
+      background: rgba(66, 165, 245, 0.2);
+    }
+    .ai-advice-item .advice-icon { margin-right: 6px; }
+    .ai-advice-item .advice-reward {
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .ai-tip {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    .ai-thinking {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+    .ai-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--blue);
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+    .ai-dot:nth-child(2) { animation-delay: 0.2s; }
+    .ai-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* ========== FLOATING EFFECTS ========== */
+    .float-text {
+      position: fixed;
+      pointer-events: none;
+      font-size: 18px;
+      font-weight: 800;
+      z-index: 9999;
+      animation: floatUp 1s ease-out forwards;
+    }
+    .float-text.gain { color: var(--green); }
+    .float-text.loss { color: #f44336; }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+    }
+
+    /* ========== LEVEL UP EFFECT ========== */
+    .levelup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: levelupFade 2s ease-out forwards;
+    }
+    .levelup-content {
+      text-align: center;
+      animation: levelupZoom 0.5s ease-out;
+    }
+    .levelup-icon { font-size: 80px; animation: bounce 0.5s ease infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes levelupZoom {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes levelupFade {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .levelup-text {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--gold);
+      text-shadow: 0 0 30px rgba(212,175,55,0.8);
+      margin-top: 10px;
+    }
+    .levelup-title {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+
+// ============ DATA ============
+const SHOP_DATA = {
+  汽车: [
+    { id: 'car1', name: '丰田凯美瑞', price: 100000, icon: '🚗' },
+    { id: 'car2', name: '奔驰S级', price: 500000, icon: '🚙' },
+    { id: 'car3', name: '法拉利SF90', price: 3000000, icon: '🏎️' },
+    { id: 'car4', name: '兰博基尼Revuelto', price: 3500000, icon: '🏎️' },
+    { id: 'car5', name: '劳斯莱斯库里南', price: 5000000, icon: '🏎️' },
+    { id: 'car6', name: '布加迪凯龙', price: 15000000, icon: '🏎️' },
+    { id: 'car7', name: '私人游艇', price: 150000000, icon: '🚤' },
+    { id: 'car8', name: '湾流G650', price: 200000000, icon: '✈️' },
+  ],
+  房产: [
+    { id: 'home1', name: '迪拜公寓', price: 2000000, icon: '🏠' },
+    { id: 'home2', name: '棕榈岛别墅', price: 50000000, icon: '🏡' },
+    { id: 'home3', name: '阿布扎比宫殿', price: 200000000, icon: '🏰' },
+  ],
+  宠物: [
+    { id: 'pet1', name: '猎隼', price: 500000, icon: '🦅' },
+    { id: 'pet2', name: '阿拉伯马', price: 1000000, icon: '🐴' },
+    { id: 'pet3', name: '狮子', price: 5000000, icon: '🦁' },
+    { id: 'pet4', name: '老虎', price: 6000000, icon: '🐯' },
+  ],
+  奢侈品: [
+    { id: 'lux1', name: '限量AJ球鞋', price: 10000, icon: '👟' },
+    { id: 'lux2', name: '爱马仕铂金包', price: 300000, icon: '👜' },
+    { id: 'lux3', name: '百达翡丽', price: 500000, icon: '⌚' },
+    { id: 'lux4', name: '钻石戒指', price: 1000000, icon: '💎' },
+  ],
+};
+
+const LEVELS = [
+  { name: '农民', threshold: 0, class: 'badge-peasant', color: '#9e9e9e' },
+  { name: '小老板', threshold: 1000000, class: 'badge-smallboss', color: '#4caf50' },
+  { name: '富商', threshold: 100000000, class: 'badge-richmerchant', color: '#42a5f5' },
+  { name: '土豪', threshold: 1000000000, class: 'badge-tycoon', color: '#ab47bc' },
+  { name: '中东之王', threshold: 100000000000, class: 'badge-king', color: '#D4AF37' },
+];
+
+const PRESET_LEADERS = [
+  { name: '穆罕默德酋长', assets: 888888888, emoji: '👳', isYou: false },
+  { name: '阿尔瓦利德王子', assets: 666666666, emoji: '👳', isYou: false },
+  { name: '拉希德·马克图姆', assets: 333333333, emoji: '👳', isYou: false },
+  { name: '奥马尔·哈桑', assets: 150000000, emoji: '👳', isYou: false },
+  { name: '本泽马', assets: 88888888, emoji: '⚽', isYou: false },
+  { name: '艾哈迈德·法拉西', assets: 50000000, emoji: '👳', isYou: false },
+  { name: '费萨尔·汗', assets: 10000000, emoji: '👳', isYou: false },
+  { name: '哈桑·易卜拉欣', assets: 5000000, emoji: '👳', isYou: false },
+  { name: '阿里·马哈茂德', assets: 500000, emoji: '👳', isYou: false },
+];
+
+const PRESET_FRIENDS = [
+  { id: 'f1', name: '法蒂玛', emoji: '👳', assets: 45000000 },
+  { id: 'f2', name: '小奥马尔', emoji: '👳', assets: 120000000 },
+  { id: 'f3', name: '萨拉', emoji: '👳', assets: 8000000 },
+  { id: 'f4', name: '穆罕默德', emoji: '👳', assets: 500000000 },
+  { id: 'f5', name: '莱拉', emoji: '👳', assets: 2000000 },
+];
+
+const ALL_ITEMS = [].concat(...Object.values(SHOP_DATA));
+
+function fmt(n) {
+  if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'B';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function fmtFull(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function getLevel(assets) {
+  let lv = LEVELS[0];
+  for (const l of LEVELS) {
+    if (assets >= l.threshold) lv = l;
+  }
+  return lv;
+}
+
+function getNextLevel(assets) {
+  for (const l of LEVELS) {
+    if (assets < l.threshold) return l;
+  }
+  return null;
+}
+
+function getLevelProgress(assets) {
+  const lv = getLevel(assets);
+  const next = getNextLevel(assets);
+  if (!next) return 100;
+  const prev = lv.threshold;
+  return Math.min(100, ((assets - prev) / (next.threshold - prev)) * 100);
+}
+
+function getItemById(id) {
+  return ALL_ITEMS.find(i => i.id === id);
+}
+
+const SAVE_KEY = 'arabTycoonSaveData';
+
+// ============ i18n ============
+const LANG_DATA = {
+  cn: {
+    startTitle: '阿拉伯土豪\n模拟器',
+    startSub: '从1,000迪拉姆起步\n成为中东最有钱的人！',
+    startBtn: '开始游戏',
+    totalAssets: '总资产',
+    identity: '身份',
+    cash: '现金',
+    title: '称号',
+    home: '主页',
+    leaderboard: '排行榜',
+    friends: '好友',
+    shop: '商店',
+    earnMoney: '赚钱',
+    work: '工作',
+    business: '做生意',
+    oilInvestment: '石油投资',
+    doIt: '执行',
+    cooldown: '冷却',
+    ownedItems: '已拥有物品',
+    noItems: '还没有物品，去商店逛逛吧！',
+    visit: '拜访',
+    gift: '送礼',
+    pk: 'PK',
+    buy: '购买',
+    owned: '已拥有',
+    cantAfford: '买不起',
+    confirmPurchase: '确认购买',
+    cancel: '取消',
+    dailyTasks: '每日任务',
+    achievements: '成就',
+    share: '分享',
+    levelUp: '升级',
+    maxLevel: '满级',
+    and: '和',
+  },
+  en: {
+    startTitle: 'Arab Tycoon\nSimulator',
+    startSub: 'Start with 1,000 AED,\nbecome the richest in Middle East!',
+    startBtn: 'Start Game',
+    totalAssets: 'Total Assets',
+    identity: 'Identity',
+    cash: 'Cash',
+    title: 'Title',
+    home: 'Home',
+    leaderboard: 'Rankings',
+    friends: 'Friends',
+    shop: 'Shop',
+    earnMoney: 'Earn Money',
+    work: 'Work',
+    business: 'Business',
+    oilInvestment: 'Oil Investment',
+    doIt: 'Do It',
+    cooldown: 'Cooldown',
+    ownedItems: 'Owned Items',
+    noItems: 'No items yet. Visit the shop!',
+    visit: 'Visit',
+    gift: 'Gift',
+    pk: 'PK',
+    buy: 'Buy',
+    owned: 'Owned',
+    cantAfford: "Can't Afford",
+    confirmPurchase: 'Confirm Purchase',
+    cancel: 'Cancel',
+    dailyTasks: 'Daily Tasks',
+    achievements: 'Achievements',
+    share: 'Share',
+    levelUp: 'Level Up',
+    maxLevel: 'MAX',
+    and: 'and',
+  },
+  ar: {
+    startTitle: 'محاكي\nالثراء العربي',
+    startSub: 'ابدأ بـ 1,000 درهم\nوأصبح الأغنى في الشرق الأوسط!',
+    startBtn: 'ابدأ اللعبة',
+    totalAssets: 'إجمالي الثروة',
+    identity: 'الهوية',
+    cash: 'النقد',
+    title: 'اللقب',
+    home: 'الرئيسية',
+    leaderboard: 'الترتيب',
+    friends: 'الأصدقاء',
+    shop: 'المتجر',
+    earnMoney: 'كسب المال',
+    work: 'عمل',
+    business: 'أعمال',
+    oilInvestment: 'استثمار النفط',
+    doIt: 'نفذ',
+    cooldown: 'انتظار',
+    ownedItems: 'الممتلكات',
+    noItems: 'لا توجد عناصر بعد. زُر المتجر!',
+    visit: 'زيارة',
+    gift: 'هدية',
+    pk: 'نزال',
+    buy: 'شراء',
+    owned: 'مملوك',
+    cantAfford: 'لا يكفي',
+    confirmPurchase: 'تأكيد الشراء',
+    cancel: 'إلغاء',
+    dailyTasks: 'المهام اليومية',
+    achievements: 'الإنجازات',
+    share: 'مشاركة',
+    levelUp: 'ترقية',
+    maxLevel: 'أقصى مستوى',
+    and: 'و',
+  }
+};
+
+// ============ DAILY TASKS ============
+const DAILY_TASKS = [
+  { id: 'work10', name: '勤奋打工人', nameEn: 'Hard Worker', nameAr: 'عامل مجتهد', desc: '打工10次', target: 10, reward: 5000, type: 'work' },
+  { id: 'biz5', name: '商业精英', nameEn: 'Business Elite', nameAr: 'نخبة الأعمال', desc: '做生意5次', target: 5, reward: 20000, type: 'business' },
+  { id: 'invest1', name: '石油大亨', nameEn: 'Oil Tycoon', nameAr: 'سلطان النفط', desc: '投资石油1次', target: 1, reward: 100000, type: 'invest' }
+];
+
+// ============ ACHIEVEMENTS ============
+const ACHIEVEMENTS = [
+  { id: 'first_million', name: '百万富翁', nameEn: 'Millionaire', nameAr: 'مليونير', desc: '资产达到100万', icon: '💰' },
+  { id: 'first_car', name: '有车一族', nameEn: 'Car Owner', nameAr: 'صاحب سيارة', desc: '购买第一辆车', icon: '🚗' },
+  { id: 'first_home', name: '房产大亨', nameEn: 'Property Magnate', nameAr: 'سيد العقارات', desc: '购买第一套房产', icon: '🏠' },
+  { id: 'pk_king', name: 'PK之王', nameEn: 'PK King', nameAr: 'ملك النزال', desc: '赢得5次PK', icon: '🏆' },
+  { id: 'big_spender', name: '挥金如土', nameEn: 'Big Spender', nameAr: 'محب للصرف', desc: '累计消费500万', icon: '💎' },
+  { id: 'luxury_collector', name: '奢侈品收藏家', nameEn: 'Luxury Collector', nameAr: 'جامع الكماليات', desc: '购买所有奢侈品', icon: '👜' },
+  { id: 'tycoon', name: '超级富豪', nameEn: 'Super Tycoon', nameAr: 'رجل أعمال كبير', desc: '资产达到1亿', icon: '👑' },
+  { id: 'daily_master', name: '日常大师', nameEn: 'Daily Master', nameAr: 'أستاذ يومي', desc: '完成所有每日任务', icon: '📅' },
+  { id: 'first_territory', name: '疆域之主', nameEn: 'Territory Lord', nameAr: 'سيد الأرض', desc: '购买第一块领土', icon: '🏜️' },
+  { id: 'charitable', name: '乐善好施', nameEn: 'Philanthropist', nameAr: 'محب للخير', desc: '累计捐赠100万', icon: '🤝' },
+  { id: 'lord_of_desert', name: '沙漠领主', nameEn: 'Desert Lord', nameAr: 'سيد الصحراء', desc: '拥有10块沙漠领土', icon: '🌵' },
+  { id: 'oasis_master', name: '绿洲之主', nameEn: 'Oasis Master', nameAr: 'سيد الواحة', desc: '拥有5块绿洲', icon: '🌴' },
+];
+
+// ============ territories (Lord System) ============
+const territories = [
+  // Desert territories (Lv2+)
+  { id: 't_desert_1', name: '迪拜沙漠', nameEn: 'Dubai Desert', icon: '🏜️', price: 10000000, income: 50000, type: 'desert', unlockLevel: 2 },
+  { id: 't_desert_2', name: '阿布扎比沙漠', nameEn: 'Abu Dhabi Desert', icon: '🏜️', price: 15000000, income: 75000, type: 'desert', unlockLevel: 2 },
+  { id: 't_desert_3', name: '沙特沙漠', nameEn: 'Saudi Desert', icon: '🏜️', price: 20000000, income: 100000, type: 'desert', unlockLevel: 3 },
+  { id: 't_desert_4', name: '卡塔尔沙漠', nameEn: 'Qatar Desert', icon: '🏜️', price: 25000000, income: 125000, type: 'desert', unlockLevel: 3 },
+  // Oasis territories (Lv3+)
+  { id: 't_oasis_1', name: '迪拜绿洲', nameEn: 'Dubai Oasis', icon: '🌴', price: 30000000, income: 150000, type: 'oasis', unlockLevel: 3 },
+  { id: 't_oasis_2', name: '阿曼绿洲', nameEn: 'Oman Oasis', icon: '🌴', price: 40000000, income: 200000, type: 'oasis', unlockLevel: 4 },
+  { id: 't_oasis_3', name: '巴林绿洲', nameEn: 'Bahrain Oasis', icon: '🌴', price: 50000000, income: 250000, type: 'oasis', unlockLevel: 4 },
+  // City territories (Lv4+)
+  { id: 't_city_1', name: '迪拜市区', nameEn: 'Dubai City', icon: '🏙️', price: 100000000, income: 500000, type: 'city', unlockLevel: 4 },
+  { id: 't_city_2', name: '阿布扎比市区', nameEn: 'Abu Dhabi City', icon: '🏙️', price: 150000000, income: 750000, type: 'city', unlockLevel: 4 },
+  { id: 't_city_3', name: '利雅得市区', nameEn: 'Riyadh City', icon: '🏙️', price: 200000000, income: 1000000, type: 'city', unlockLevel: 5 },
+  // Capital territories (Lv5)
+  { id: 't_capital_1', name: '酋长皇宫', nameEn: 'Emir Palace', icon: '🏰', price: 500000000, income: 2500000, type: 'capital', unlockLevel: 5 },
+  { id: 't_capital_2', name: '石油王国', nameEn: 'Oil Kingdom', icon: '🛢️', price: 1000000000, income: 5000000, type: 'capital', unlockLevel: 5 },
+];
+
+// ============ LORD RANKS ============
+const LORD_RANKS = [
+  { id: 'lord_commoner', name: '平民', nameEn: 'Commoner', icon: '👤', territoryValue: 0, bonus: '无' },
+  { id: 'lord_sheikh', name: '谢赫', nameEn: 'Sheikh', icon: '👳', territoryValue: 50000000, bonus: '领地收入+10%' },
+  { id: 'lord_emir', name: '埃米尔', nameEn: 'Emir', icon: '🧔', territoryValue: 200000000, bonus: '领地收入+25%' },
+  { id: 'lord_king', name: '国王', nameEn: 'King', icon: '👑', territoryValue: 500000000, bonus: '领地收入+50%' },
+  { id: 'lord_emperor', name: '皇帝', nameEn: 'Emperor', icon: '🏆', territoryValue: 2000000000, bonus: '领地收入+100%' },
+];
+
+// ============ FIXED GIFTS ============
+const FIXED_GIFTS = [
+  { id: 'gift_watch', name: '百达翡丽名表', icon: '⌚', price: 50000, desc: '经典瑞士名表' },
+  { id: 'gift_car', name: '法拉利跑车', icon: '🏎️', price: 500000, desc: '跃马旗舰跑车' },
+  { id: 'gift_villa', name: '棕榈岛别墅', icon: '🏘️', price: 5000000, desc: '迪拜顶级别墅' },
+];
+
+// ============ CHARITY OPTIONS ============
+const CHARITY_OPTIONS = [
+  { id: 'charity_small', name: '小笔捐赠', amount: 10000, bonus: 5000, icon: '💚' },
+  { id: 'charity_medium', name: '中等捐赠', amount: 100000, bonus: 60000, icon: '💙' },
+  { id: 'charity_large', name: '巨额捐赠', amount: 1000000, bonus: 700000, icon: '💜' },
+];
+
+// ============ DAILY SIGNIN REWARDS ============
+const SIGNIN_REWARDS = [
+  { day: 1, reward: 1000, icon: '📦' },
+  { day: 2, reward: 2000, icon: '💰' },
+  { day: 3, reward: 5000, icon: '🎁' },
+  { day: 4, reward: 8000, icon: '💎' },
+  { day: 5, reward: 10000, icon: '🏆' },
+  { day: 6, reward: 20000, icon: '👑' },
+  { day: 7, reward: 50000, icon: '🎉' },
+];
+
+// ============ APP ============
+createApp({
+  setup() {
+    // State
+    const started = ref(false);
+    const activeTab = ref('home');
+    const shopTab = ref('汽车');
+    const lbTab = ref('总资产');
+    const view = ref('home'); // home | shop | friends | leaderboard
+    const currentLang = ref('cn'); // cn | en | ar
+    const isRtl = computed(() => currentLang.value === 'ar');
+
+    // Translation helper
+    const t = (key) => {
+      return LANG_DATA[currentLang.value]?.[key] || LANG_DATA['cn'][key] || key;
+    };
+
+    // Player data
+    const cash = ref(1000);
+    const ownedItems = ref([]);
+    const lastWorkTime = ref(0);
+    const lastBusinessTime = ref(0);
+    const lastInvestTime = ref(0);
+    const playerTitle = ref('');
+    const titleExpiry = ref(0);
+
+    // Modal
+    const modal = ref(null); // { type, ... }
+
+    // Toast
+    const toast = ref(null);
+    let toastTimer = null;
+
+    // Cooldowns
+    const workCD = ref(0);
+    const businessCD = ref(0);
+    const investCD = ref(0);
+    let cdInterval = null;
+
+    // Gift selection
+    const giftFriend = ref(null);
+
+    // Daily Tasks
+    const workCount = ref(0);
+    const businessCount = ref(0);
+    const investCount = ref(0);
+    const lastResetDate = ref('');
+    const completedTasks = ref([]);
+    const dailyTasksTab = ref('tasks'); // tasks | achievements
+
+    // Achievements
+    const unlockedAchievements = ref([]);
+    const pkWins = ref(0);
+    const totalSpent = ref(0);
+    const showAchievementUnlock = ref(null);
+
+    // Share Poster
+    const showSharePoster = ref(false);
+    const posterCanvas = ref(null);
+
+    // Gift Animation
+    const giftAnimations = ref([]);
+    const giftNotifications = ref([]);
+
+    // Multiplayer PK
+    const showPKMatch = ref(false);
+    const pkMatchOpponent = ref(null);
+    const pkResultShow = ref(null);
+    const pkSearching = ref(false);
+
+    // AI opponents for multiplayer PK
+    const AI_OPPONENTS = [
+      { id: 'ai1', name: '迪拜王子', emoji: '👳', assets: 500000000 },
+      { id: 'ai2', name: '沙特富豪', emoji: '🧔', assets: 300000000 },
+      { id: 'ai3', name: '卡塔尔贵族', emoji: '👳', assets: 200000000 },
+      { id: 'ai4', name: '科威特酋长', emoji: '🧔', assets: 150000000 },
+    ];
+
+    // ============ WEALTH HISTORY (Chart) ============
+    const wealthHistory = ref([]); // Array of { time: Date, value: number }
+    const MAX_WEALTH_HISTORY = 20;
+
+    function addWealthRecord() {
+      const totalAssets = getTotalAssets();
+      wealthHistory.value.push({ time: new Date(), value: totalAssets });
+      if (wealthHistory.value.length > MAX_WEALTH_HISTORY) {
+        wealthHistory.value.shift();
+      }
+    }
+
+    function getWealthChartData() {
+      return wealthHistory.value.map((r, i) => {
+        const max = Math.max(...wealthHistory.value.map(h => h.value), 1);
+        return { ...r, height: Math.max((r.value / max) * 100, 5) };
+      });
+    }
+
+    // ============ SOUND SYSTEM (Web Audio API) ============
+    let audioCtx = null;
+    const soundEnabled = ref(true);
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled.value) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        switch (type) {
+          case 'coin':
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+            break;
+          case 'levelup':
+            osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+            break;
+          case 'buy':
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+            break;
+          case 'invest_win':
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+            break;
+          case 'invest_loss':
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+            break;
+          case 'click':
+            osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+            break;
+          case 'achievement':
+            osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(1047, audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(1319, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.6);
+            break;
+        }
+      } catch (e) {
+        // Audio not supported
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled.value = !soundEnabled.value;
+    }
+
+    // ============ FLOATING TEXT EFFECTS ============
+    const floatingTexts = ref([]);
+
+    function showFloatingText(text, type = 'gain', x = window.innerWidth / 2, y = 200) {
+      const id = Date.now() + Math.random();
+      floatingTexts.value.push({ id, text, type, x, y });
+      setTimeout(() => {
+        floatingTexts.value = floatingTexts.value.filter(f => f.id !== id);
+      }, 1000);
+    }
+
+    // ============ LEVEL UP OVERLAY ============
+    const showLevelUpOverlay = ref(false);
+    const levelUpData = ref(null);
+
+    function triggerLevelUp(newLevel) {
+      levelUpData.value = newLevel;
+      showLevelUpOverlay.value = true;
+      playSound('levelup');
+      setTimeout(() => {
+        showLevelUpOverlay.value = false;
+      }, 2500);
+    }
+
+    // ============ AI ADVISOR ============
+    const showAiAdvisor = ref(false);
+    const aiAdvices = computed(() => {
+      const assets = getTotalAssets();
+      const level = getLevel(assets);
+      const advices = [];
+
+      if (assets < 1000000) {
+        advices.push({ icon: '💼', text: '建议先工作攒钱，积累第一桶金', action: 'work' });
+        advices.push({ icon: '🛢️', text: '石油投资风险太高，现在不适合', action: 'none' });
+      } else if (assets < 10000000) {
+        advices.push({ icon: '🛢️', text: '可以尝试石油投资，高风险高回报', action: 'invest' });
+        advices.push({ icon: '🏠', text: '考虑购买房产，保值又体面', action: 'shop' });
+      } else if (assets < 100000000) {
+        advices.push({ icon: '🛢️', text: '石油投资是赚大钱的好机会！', action: 'invest' });
+        advices.push({ icon: '🏜️', text: '购买领土，建立领地收入', action: 'territory' });
+      } else if (assets < 1000000000) {
+        advices.push({ icon: '🏜️', text: '领地系统收益很高，多买领土', action: 'territory' });
+        advices.push({ icon: '🤝', text: '慈善捐赠可以获得额外奖励', action: 'charity' });
+      } else {
+        advices.push({ icon: '👑', text: '你已经是土豪了，继续扩大影响力！', action: 'none' });
+        advices.push({ icon: '🏰', text: '购买酋长皇宫，成为真正的领主', action: 'territory' });
+      }
+
+      // Add advice based on daily tasks
+      if (completedTasks.value.length < 3) {
+        advices.push({ icon: '📋', text: '记得完成每日任务，奖励很丰厚！', action: 'tasks' });
+      }
+
+      return advices.slice(0, 3);
+    });
+
+    function handleAiAdvice(advice) {
+      if (advice.action === 'work') activeTab.value = 'home';
+      else if (advice.action === 'invest') activeTab.value = 'home';
+      else if (advice.action === 'shop') view.value = 'shop';
+      else if (advice.action === 'territory') activeTab.value = 'territory';
+      else if (advice.action === 'tasks') activeTab.value = 'tasks';
+      showAiAdvisor.value = false;
+    }
+
+    // ============ TERRITORY / LORD SYSTEM ============
+    const ownedTerritories = ref([]);
+    const territoriesTab = ref('territories'); // territories | ranks
+
+    // ============ DAILY SIGNIN ============
+    const lastSigninDate = ref('');
+    const signinHistory = ref([]); // Array of dates signed in
+
+    // ============ CHARITY ============
+    const charityTotal = ref(0);
+    const charityMessage = ref('');
+
+    // ============ PROPERTY RENTAL ============
+    const rentalEnabled = ref(true);
+    const rentalIncome = computed(() => {
+      if (!rentalEnabled.value) return 0;
+      let baseIncome = 0;
+      ownedTerritories.value.forEach(tId => {
+        const t = territories.find(ter => ter.id === tId);
+        if (t) baseIncome += t.income;
+      });
+      // Apply lord rank bonus
+      const lordBonus = getLordRankBonus();
+      return Math.floor(baseIncome * (1 + lordBonus));
+    });
+
+    function getLordRankBonus() {
+      const totalValue = ownedTerritories.value.reduce((sum, tId) => {
+        const t = territories.find(ter => ter.id === tId);
+        return sum + (t ? t.price : 0);
+      }, 0);
+      if (totalValue >= 2000000000) return 1.0; // Emperor 100%
+      if (totalValue >= 500000000) return 0.5; // King 50%
+      if (totalValue >= 200000000) return 0.25; // Emir 25%
+      if (totalValue >= 50000000) return 0.1; // Sheikh 10%
+      return 0;
+    }
+
+    function getLordRank() {
+      const totalValue = ownedTerritories.value.reduce((sum, tId) => {
+        const t = territories.find(ter => ter.id === tId);
+        return sum + (t ? t.price : 0);
+      }, 0);
+      if (totalValue >= 2000000000) return LORD_RANKS[4]; // Emperor
+      if (totalValue >= 500000000) return LORD_RANKS[3]; // King
+      if (totalValue >= 200000000) return LORD_RANKS[2]; // Emir
+      if (totalValue >= 50000000) return LORD_RANKS[1]; // Sheikh
+      return LORD_RANKS[0]; // Commoner
+    }
+
+    // ============ FRIEND PROFILE ============
+    const viewingFriend = ref(null);
+    const likedFriends = ref(new Set());
+    const lastLikeDate = ref('');
+
+    // ============ SIGNIN HELPERS ============
+    function canSignin() {
+      const today = new Date().toDateString();
+      return lastSigninDate.value !== today;
+    }
+
+    function getSigninDay() {
+      // Find current streak by counting consecutive days signed in
+      const today = new Date();
+      let streak = 0;
+      let checkDate = new Date(today);
+      for (let i = 0; i < 7; i++) {
+        const dateStr = checkDate.toDateString();
+        if (signinHistory.value.includes(dateStr)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return (streak % 7) + 1;
+    }
+
+    function hasSignedOnDay(dayNum) {
+      // Check if user signed in on the day corresponding to this day number in cycle
+      const today = new Date();
+      const targetDate = new Date(today);
+      const currentCycleDay = getSigninDay();
+      // Calculate which date we need to check
+      const daysAgo = currentCycleDay - dayNum;
+      targetDate.setDate(targetDate.getDate() - daysAgo);
+      return signinHistory.value.includes(targetDate.toDateString());
+    }
+
+    function doSignin() {
+      if (!canSignin()) return;
+      const today = new Date().toDateString();
+      const day = getSigninDay();
+      const reward = SIGNIN_REWARDS[day - 1].reward;
+
+      lastSigninDate.value = today;
+      signinHistory.value.push(today);
+      cash.value += reward;
+      addWealthRecord();
+      showFloatingText('+' + fmtFull(reward), 'gain');
+      playSound('coin');
+      checkAchievements();
+      save();
+      showToast(`签到成功! +${fmtFull(reward)} AED 🎉`, 'success');
+    }
+
+    // ============ CHARITY HELPERS ============
+    function doCharity(option) {
+      if (cash.value < option.amount) {
+        showToast('现金不够!', 'error');
+        return;
+      }
+      cash.value -= option.amount;
+      charityTotal.value += option.amount;
+      const bonus = option.bonus;
+      cash.value += bonus;
+      addWealthRecord();
+      showFloatingText('+' + fmtFull(bonus - option.amount), 'gain');
+      playSound('coin');
+      save();
+      showToast(`${option.icon} 捐赠成功! 获得+${fmtFull(bonus)} AED奖励!`, 'success');
+      checkAchievements();
+    }
+
+    // ============ TERRITORY HELPERS ============
+    function buyTerritory(territory) {
+      if (ownedTerritories.value.includes(territory.id)) return;
+      if (cash.value < territory.price) {
+        showToast('现金不够!', 'error');
+        return;
+      }
+      if (level.value.class === 'badge-peasant') {
+        showToast('需要达到小老板等级才能购买领土!', 'error');
+        return;
+      }
+      cash.value -= territory.price;
+      ownedTerritories.value.push(territory.id);
+      totalSpent.value += territory.price;
+      addWealthRecord();
+      showFloatingText('-' + fmtFull(territory.price), 'loss');
+      playSound('buy');
+      save();
+      checkAchievements();
+      showToast(`🏜️ 恭喜获得 ${territory.name}!`, 'success');
+    }
+
+    function getTerritoryIncome() {
+      if (!rentalEnabled.value) return 0;
+      let income = 0;
+      ownedTerritories.value.forEach(tId => {
+        const t = territories.find(ter => ter.id === tId);
+        if (t) income += t.income;
+      });
+      return Math.floor(income * (1 + getLordRankBonus()));
+    }
+
+    // ============ FRIEND PROFILE HELPERS ============
+    function visitFriendProfile(friend) {
+      viewingFriend.value = friend;
+    }
+
+    function closeFriendProfile() {
+      viewingFriend.value = null;
+    }
+
+    function likeFriend(friend) {
+      const today = new Date().toDateString();
+      if (lastLikeDate.value === today) {
+        showToast('今天已经点赞过了!', 'error');
+        return;
+      }
+      likedFriends.value.add(friend.id);
+      lastLikeDate.value = today;
+      cash.value += 50; // 点赞奖励50 AED
+      save();
+      showToast(`👍 给 ${friend.name} 点赞 +50 AED!`, 'success');
+    }
+
+    function collectRentalIncome() {
+      if (ownedTerritories.value.length === 0) {
+        showToast('你还没有领土!', 'error');
+        return;
+      }
+      const income = getTerritoryIncome();
+      if (income <= 0) {
+        showToast('今日没有收入!', 'error');
+        return;
+      }
+      cash.value += income;
+      addWealthRecord();
+      showFloatingText('+' + fmtFull(income), 'gain');
+      playSound('coin');
+      save();
+      showToast(`🏜️ 领地收租 +${fmtFull(income)} AED!`, 'success');
+    }
+
+    // Computed
+    const totalAssets = computed(() => {
+      const itemsValue = ownedItems.value.reduce((sum, id) => {
+        const item = getItemById(id);
+        return sum + (item ? item.price : 0);
+      }, 0);
+      const territoryValue = ownedTerritories.value.reduce((sum, tId) => {
+        const t = territories.find(ter => ter.id === tId);
+        return sum + (t ? t.price : 0);
+      }, 0);
+      return cash.value + itemsValue + territoryValue;
+    });
+
+    const level = computed(() => getLevel(totalAssets.value));
+    const nextLevel = computed(() => getNextLevel(totalAssets.value));
+    const levelProgress = computed(() => getLevelProgress(totalAssets.value));
+
+    const displayTitle = computed(() => {
+      if (playerTitle.value && Date.now() < titleExpiry.value) {
+        return playerTitle.value;
+      }
+      return '';
+    });
+
+    const canWork = computed(() => workCD.value <= 0);
+    const canBusiness = computed(() => businessCD.value <= 0);
+    const canInvest = computed(() => investCD.value <= 0);
+
+    // Helper to get total assets value
+    function getTotalAssets() {
+      return totalAssets.value;
+    }
+
+    const currentShopItems = computed(() => SHOP_DATA[shopTab.value] || []);
+
+    // Daily Tasks computed
+    const dailyTaskProgress = computed(() => [
+      { ...DAILY_TASKS[0], progress: Math.min(workCount.value, DAILY_TASKS[0].target), done: completedTasks.value.includes('work10') },
+      { ...DAILY_TASKS[1], progress: Math.min(businessCount.value, DAILY_TASKS[1].target), done: completedTasks.value.includes('biz5') },
+      { ...DAILY_TASKS[2], progress: Math.min(investCount.value, DAILY_TASKS[2].target), done: completedTasks.value.includes('invest1') },
+    ]);
+
+    const allDailyTasksDone = computed(() => dailyTaskProgress.value.every(t => t.done));
+
+    // Achievements computed
+    const achievementsWithStatus = computed(() => {
+      return ACHIEVEMENTS.map(a => ({
+        ...a,
+        unlocked: unlockedAchievements.value.includes(a.id)
+      }));
+    });
+
+    // Leaderboard
+    const leaderboard = computed(() => {
+      let list = [...PRESET_LEADERS];
+      // Add you
+      const youIdx = list.findIndex(l => l.isYou);
+      if (youIdx >= 0) list.splice(youIdx, 1);
+
+      list.push({ name: '你', assets: totalAssets.value, emoji: '😎', isYou: true });
+
+      // Sort by assets desc
+      list.sort((a, b) => b.assets - a.assets);
+
+      // Add ranks
+      return list.map((l, i) => ({ ...l, rank: i + 1 }));
+    });
+
+    const leaderboardByCategory = computed(() => {
+      if (lbTab.value === '总资产') return leaderboard.value;
+
+      const catMap = { '汽车': 'car', '房产': 'home', '宠物': 'pet', '奢侈品': 'lux' };
+      const prefix = catMap[lbTab.value];
+      if (!prefix) return leaderboard.value;
+
+      // Count items in category
+      const getCatAssets = (items) => {
+        return items
+          .filter(id => id.startsWith(prefix))
+          .reduce((s, id) => s + (getItemById(id)?.price || 0), 0);
+      };
+
+      let list = PRESET_LEADERS.map(l => ({
+        ...l,
+        rank: 0,
+        assets: lbTab.value === '总资产' ? l.assets : Math.floor(l.assets * (Math.random() * 0.3 + 0.1)),
+      }));
+
+      list.push({ name: '你', emoji: '😎', isYou: true, rank: 0, assets: getCatAssets(ownedItems.value) });
+
+      list.sort((a, b) => b.assets - a.assets);
+      return list.map((l, i) => ({ ...l, rank: i + 1 }));
+    });
+
+    // Friends with dynamic assets
+    const friends = computed(() => {
+      return PRESET_FRIENDS.map(f => ({
+        ...f,
+        level: getLevel(f.assets),
+      }));
+    });
+
+    // Owned items with details
+    const ownedItemsList = computed(() => {
+      return ownedItems.value.map(id => getItemById(id)).filter(Boolean);
+    });
+
+    // ============ METHODS ============
+    function showToast(msg, type = '') {
+      if (toastTimer) clearTimeout(toastTimer);
+      toast.value = { msg, type };
+      toastTimer = setTimeout(() => { toast.value = null; }, 2200);
+    }
+
+    function save() {
+      const data = {
+        cash: cash.value,
+        ownedItems: ownedItems.value,
+        lastWorkTime: lastWorkTime.value,
+        lastBusinessTime: lastBusinessTime.value,
+        lastInvestTime: lastInvestTime.value,
+        title: playerTitle.value,
+        titleExpiry: titleExpiry.value,
+        // Territory System
+        ownedTerritories: ownedTerritories.value,
+        // Daily Signin
+        lastSigninDate: lastSigninDate.value,
+        signinHistory: signinHistory.value,
+        // Charity
+        charityTotal: charityTotal.value,
+        // Rental
+        rentalEnabled: rentalEnabled.value,
+        // PK stats
+        pkWins: pkWins.value,
+        totalSpent: totalSpent.value,
+        // Achievements
+        unlockedAchievements: unlockedAchievements.value,
+        // Daily tasks
+        workCount: workCount.value,
+        businessCount: businessCount.value,
+        investCount: investCount.value,
+        completedTasks: completedTasks.value,
+        lastResetDate: lastResetDate.value,
+        // Liked friends
+        likedFriends: Array.from(likedFriends.value),
+        lastLikeDate: lastLikeDate.value,
+        // Wealth History
+        wealthHistory: wealthHistory.value,
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    }
+
+    function load() {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        cash.value = data.cash ?? 1000;
+        ownedItems.value = data.ownedItems ?? [];
+        lastWorkTime.value = data.lastWorkTime ?? 0;
+        lastBusinessTime.value = data.lastBusinessTime ?? 0;
+        lastInvestTime.value = data.lastInvestTime ?? 0;
+        playerTitle.value = data.title ?? '';
+        titleExpiry.value = data.titleExpiry ?? 0;
+
+        // Reset expired cooldowns
+        const now = Date.now();
+        if (lastWorkTime.value > 0 && now - lastWorkTime.value >= 60000) lastWorkTime.value = 0;
+        if (lastBusinessTime.value > 0 && now - lastBusinessTime.value >= 600000) lastBusinessTime.value = 0;
+        if (lastInvestTime.value > 0 && now - lastInvestTime.value >= 3600000) lastInvestTime.value = 0;
+
+        // Clear expired title
+        if (titleExpiry.value > 0 && now >= titleExpiry.value) {
+          playerTitle.value = '';
+          titleExpiry.value = 0;
+        }
+
+        // Load new state
+        ownedTerritories.value = data.ownedTerritories ?? [];
+        lastSigninDate.value = data.lastSigninDate ?? '';
+        signinHistory.value = data.signinHistory ?? [];
+        charityTotal.value = data.charityTotal ?? 0;
+        rentalEnabled.value = data.rentalEnabled ?? true;
+        pkWins.value = data.pkWins ?? 0;
+        totalSpent.value = data.totalSpent ?? 0;
+        unlockedAchievements.value = data.unlockedAchievements ?? [];
+        workCount.value = data.workCount ?? 0;
+        businessCount.value = data.businessCount ?? 0;
+        investCount.value = data.investCount ?? 0;
+        completedTasks.value = data.completedTasks ?? [];
+        lastResetDate.value = data.lastResetDate ?? '';
+        likedFriends.value = new Set(data.likedFriends ?? []);
+        lastLikeDate.value = data.lastLikeDate ?? '';
+        wealthHistory.value = (data.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
+
+        // Check if signin needs reset (new day)
+        const today = new Date().toDateString();
+        if (lastSigninDate.value && lastSigninDate.value !== today) {
+          // It's a new day, can sign in again
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function startGame() {
+      started.value = true;
+      load();
+      addWealthRecord();
+      updateCooldowns();
+      cdInterval = setInterval(updateCooldowns, 1000);
+    }
+
+    function updateCooldowns() {
+      const now = Date.now();
+      workCD.value = Math.max(0, 60 - Math.floor((now - lastWorkTime.value) / 1000));
+      businessCD.value = Math.max(0, 600 - Math.floor((now - lastBusinessTime.value) / 1000));
+      investCD.value = Math.max(0, 3600 - Math.floor((now - lastInvestTime.value) / 1000));
+
+      // Check expired cooldowns → reset
+      if (lastWorkTime.value > 0 && workCD.value === 0 && now - lastWorkTime.value >= 60000) lastWorkTime.value = 0;
+      if (lastBusinessTime.value > 0 && businessCD.value === 0 && now - lastBusinessTime.value >= 600000) lastBusinessTime.value = 0;
+      if (lastInvestTime.value > 0 && investCD.value === 0 && now - lastInvestTime.value >= 3600000) lastInvestTime.value = 0;
+    }
+
+    function fmtCD(seconds) {
+      if (seconds <= 0) return '';
+      if (seconds >= 3600) return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
+      if (seconds >= 60) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+      return `${seconds}s`;
+    }
+
+    function doWork() {
+      if (!canWork.value) return;
+      cash.value += 1000;
+      lastWorkTime.value = Date.now();
+      workCount.value++;
+      addWealthRecord();
+      showFloatingText('+1,000', 'gain');
+      playSound('coin');
+      checkDailyTasks();
+      checkAchievements();
+      save();
+      showToast('工作赚了 +1,000 迪拉姆! 💼', 'success');
+    }
+
+    function doBusiness() {
+      if (!canBusiness.value) return;
+      cash.value += 10000;
+      lastBusinessTime.value = Date.now();
+      businessCount.value++;
+      addWealthRecord();
+      showFloatingText('+10,000', 'gain');
+      playSound('coin');
+      checkDailyTasks();
+      checkAchievements();
+      save();
+      showToast('做生意赚了 +10,000 迪拉姆! 🛒', 'success');
+    }
+
+    function doInvest() {
+      if (!canInvest.value) return;
+      modal.value = { type: 'invest-confirm' };
+    }
+
+    function confirmInvest() {
+      modal.value = null;
+      lastInvestTime.value = Date.now();
+      investCount.value++;
+      addWealthRecord();
+      checkDailyTasks();
+      const won = Math.random() < 0.5;
+      if (won) {
+        cash.value += 1000000;
+        showFloatingText('+1,000,000', 'gain');
+        playSound('invest_win');
+        save();
+        modal.value = { type: 'invest-result', won: true };
+      } else {
+        const loss = Math.floor(cash.value * 0.5);
+        cash.value -= loss;
+        showFloatingText('-' + fmtFull(loss), 'loss');
+        playSound('invest_loss');
+        save();
+        modal.value = { type: 'invest-result', won: false, loss };
+      }
+      checkAchievements();
+    }
+
+    function checkDailyTasks() {
+      const today = new Date().toDateString();
+      if (lastResetDate.value !== today) {
+        // Reset daily tasks
+        workCount.value = 0;
+        businessCount.value = 0;
+        investCount.value = 0;
+        completedTasks.value = [];
+        lastResetDate.value = today;
+        save();
+      }
+
+      // Check task completion
+      if (workCount.value >= 10 && !completedTasks.value.includes('work10')) {
+        completedTasks.value.push('work10');
+        cash.value += 5000;
+        showToast('每日任务完成! 打工达人 +5,000', 'success');
+      }
+      if (businessCount.value >= 5 && !completedTasks.value.includes('biz5')) {
+        completedTasks.value.push('biz5');
+        cash.value += 20000;
+        showToast('每日任务完成! 商业精英 +20,000', 'success');
+      }
+      if (investCount.value >= 1 && !completedTasks.value.includes('invest1')) {
+        completedTasks.value.push('invest1');
+        cash.value += 100000;
+        showToast('每日任务完成! 石油大亨 +100,000', 'success');
+      }
+    }
+
+    function checkAchievements() {
+      const assets = totalAssets.value;
+      const owned = ownedItems.value;
+
+      // First Millionaire
+      if (assets >= 1000000 && !unlockedAchievements.value.includes('first_million')) {
+        unlockedAchievements.value.push('first_million');
+        showAchievementUnlock.value = ACHIEVEMENTS[0];
+        playSound('achievement');
+        showToast('🏆 成就解锁: 百万富翁!', 'success');
+      }
+      // Car Owner
+      if (owned.some(i => i.startsWith('car')) && !unlockedAchievements.value.includes('first_car')) {
+        unlockedAchievements.value.push('first_car');
+        showAchievementUnlock.value = ACHIEVEMENTS[1];
+        playSound('achievement');
+        showToast('🏆 成就解锁: 有车一族!', 'success');
+      }
+      // Property Owner
+      if (owned.some(i => i.startsWith('home')) && !unlockedAchievements.value.includes('first_home')) {
+        unlockedAchievements.value.push('first_home');
+        showAchievementUnlock.value = ACHIEVEMENTS[2];
+        playSound('achievement');
+        showToast('🏆 成就解锁: 房产大亨!', 'success');
+      }
+      // PK King (5 wins)
+      if (pkWins.value >= 5 && !unlockedAchievements.value.includes('pk_king')) {
+        unlockedAchievements.value.push('pk_king');
+        showAchievementUnlock.value = ACHIEVEMENTS[3];
+        playSound('achievement');
+        showToast('🏆 成就解锁: PK之王!', 'success');
+      }
+      // Big Spender (5M spent)
+      if (totalSpent.value >= 5000000 && !unlockedAchievements.value.includes('big_spender')) {
+        unlockedAchievements.value.push('big_spender');
+        showAchievementUnlock.value = ACHIEVEMENTS[4];
+        playSound('achievement');
+        showToast('🏆 成就解锁: 挥金如土!', 'success');
+      }
+    }
+
+    function buyItem(item) {
+      if (ownedItems.value.includes(item.id)) return;
+      if (cash.value < item.price) return;
+      modal.value = { type: 'buy-confirm', item };
+    }
+
+    function confirmBuy() {
+      const item = modal.value.item;
+      if (cash.value < item.price || ownedItems.value.includes(item.id)) {
+        modal.value = null;
+        return;
+      }
+      cash.value -= item.price;
+      totalSpent.value += item.price;
+      ownedItems.value.push(item.id);
+      addWealthRecord();
+      showFloatingText('-' + fmtFull(item.price), 'loss');
+      playSound('buy');
+      save();
+      checkAchievements();
+      modal.value = null;
+      showToast(`${item.icon} ${item.name} 购买成功！`, 'success');
+    }
+
+    function goShop() {
+      view.value = 'shop';
+      activeTab.value = 'home';
+    }
+
+    function goBack() {
+      view.value = 'home';
+    }
+
+    // Friends
+    function visitFriend(friend) {
+      alert(`你去拜访了${friend.name}的家，欣赏了他们的收藏！🏠`);
+    }
+
+    function openGift(friend) {
+      giftFriend.value = friend;
+      modal.value = { type: 'gift-select' };
+    }
+
+    function sendGift(item) {
+      if (!giftFriend.value) return;
+      if (cash.value < item.price) {
+        showToast('现金不够！', 'error');
+        return;
+      }
+      cash.value -= item.price;
+      if (!ownedItems.value.includes(item.id)) {
+        ownedItems.value.push(item.id);
+      }
+      save();
+      showToast(`🎁 送了 ${item.icon} ${item.name} 给 ${giftFriend.value.name}！`, 'success');
+      modal.value = null;
+      giftFriend.value = null;
+    }
+
+    function pkFriend(friend) {
+      const win = totalAssets.value > friend.assets;
+      if (win) {
+        playerTitle.value = '小土豪';
+        titleExpiry.value = Date.now() + 3 * 24 * 3600 * 1000;
+        pkWins.value++;
+        checkAchievements();
+        save();
+      }
+      modal.value = { type: 'pk-result', win, friend };
+    }
+
+    // ============ SHARE POSTER ============
+    function openSharePoster() {
+      showSharePoster.value = true;
+      setTimeout(() => generatePoster(), 100);
+    }
+
+    function generatePoster() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+
+      // Gold gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, 1920);
+      gradient.addColorStop(0, '#1a1208');
+      gradient.addColorStop(0.5, '#2a1e0f');
+      gradient.addColorStop(1, '#1a1208');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Decorative pattern (dots)
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.05)';
+      for (let i = 0; i < 50; i++) {
+        for (let j = 0; j < 90; j++) {
+          if ((i + j) % 3 === 0) {
+            ctx.beginPath();
+            ctx.arc(i * 22 + 11, j * 22 + 11, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Dubai skyline silhouette
+      ctx.fillStyle = '#0a0805';
+      const skyline = () => {
+        const buildings = [
+          { x: 0, w: 120, h: 400 },
+          { x: 100, w: 80, h: 600 },
+          { x: 170, w: 60, h: 350 },
+          { x: 220, w: 100, h: 700 },
+          { x: 310, w: 50, h: 300 },
+          { x: 350, w: 80, h: 550 },
+          { x: 420, w: 60, h: 280 },
+          { x: 470, w: 90, h: 480 },
+          { x: 550, w: 70, h: 380 },
+          { x: 610, w: 100, h: 650 },
+          { x: 700, w: 60, h: 320 },
+          { x: 750, w: 80, h: 500 },
+          { x: 820, w: 70, h: 420 },
+          { x: 880, w: 90, h: 580 },
+          { x: 960, w: 120, h: 350 },
+        ];
+        ctx.beginPath();
+        ctx.moveTo(0, 1920);
+        buildings.forEach(b => {
+          ctx.lineTo(b.x, 1920 - b.h);
+          ctx.lineTo(b.x + b.w, 1920 - b.h);
+        });
+        ctx.lineTo(1080, 1920);
+        ctx.closePath();
+        ctx.fill();
+      };
+      skyline();
+
+      // Burj Khalifa (tallest)
+      ctx.fillStyle = '#0a0805';
+      ctx.beginPath();
+      ctx.moveTo(500, 1920 - 800);
+      ctx.lineTo(520, 1920 - 850);
+      ctx.lineTo(540, 1920 - 820);
+      ctx.lineTo(560, 1920 - 880);
+      ctx.lineTo(580, 1920 - 850);
+      ctx.lineTo(600, 1920 - 800);
+      ctx.closePath();
+      ctx.fill();
+
+      // Game logo
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 80px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏰', 540, 280);
+
+      // Title
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 72px sans-serif';
+      ctx.fillText(LANG_DATA[currentLang.value]?.startTitle?.replace('\n', ' ') || 'ARAB TYCOON', 540, 400);
+
+      ctx.fillStyle = '#F0D060';
+      ctx.font = '36px sans-serif';
+      ctx.fillText(LANG_DATA[currentLang.value]?.startSub?.split('\n')[0] || 'Start with 1,000 AED', 540, 480);
+
+      // Main wealth display
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 90px sans-serif';
+      const assetsText = fmtFull(totalAssets.value) + ' AED';
+      ctx.fillText(assetsText, 540, 700);
+
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = '36px sans-serif';
+      ctx.fillText(LANG_DATA[currentLang.value]?.totalAssets || 'TOTAL ASSETS', 540, 780);
+
+      // Level badge
+      ctx.fillStyle = level.value.color || '#D4AF37';
+      ctx.strokeStyle = level.value.color || '#D4AF37';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.roundRect(340, 850, 400, 80, 40);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.1)';
+      ctx.fill();
+      ctx.fillStyle = level.value.color || '#D4AF37';
+      ctx.font = 'bold 40px sans-serif';
+      ctx.fillText(level.value.name, 540, 908);
+
+      // Ranking info
+      const rank = leaderboard.value.findIndex(l => l.isYou) + 1;
+      ctx.fillStyle = '#F0D060';
+      ctx.font = '36px sans-serif';
+      ctx.fillText(`🏆 ${LANG_DATA[currentLang.value]?.leaderboard || 'RANKING'} #${rank}`, 540, 1050);
+
+      // Divider
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(140, 1100);
+      ctx.lineTo(940, 1100);
+      ctx.stroke();
+
+      // Owned items showcase
+      if (ownedItemsList.value.length > 0) {
+        ctx.fillStyle = '#D4AF37';
+        ctx.font = 'bold 32px sans-serif';
+        ctx.fillText(LANG_DATA[currentLang.value]?.ownedItems || 'MY ASSETS', 540, 1180);
+
+        const topItems = ownedItemsList.value.slice(0, 6);
+        const itemSize = 120;
+        const startX = 540 - (topItems.length * itemSize) / 2 + itemSize / 2;
+        topItems.forEach((item, i) => {
+          const x = startX + i * itemSize;
+          ctx.font = '60px sans-serif';
+          ctx.fillText(item.icon, x, 1300);
+        });
+      }
+
+      // Bottom branding
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillText('🌴 Arab Tycoon Simulator 🌴', 540, 1700);
+
+      ctx.fillStyle = '#888';
+      ctx.font = '24px sans-serif';
+      ctx.fillText('Play Now: arabtycoon.com', 540, 1780);
+
+      // Watermark
+      ctx.fillStyle = 'rgba(212, 175, 55, 0.3)';
+      ctx.font = '20px sans-serif';
+      ctx.fillText(new Date().getFullYear() + ' © All Rights Reserved', 540, 1860);
+
+      posterCanvas.value = canvas;
+    }
+
+    function downloadPoster() {
+      if (!posterCanvas.value) return;
+      const link = document.createElement('a');
+      link.download = 'my-wealth-arab-tycoon.png';
+      link.href = posterCanvas.value.toDataURL('image/png');
+      link.click();
+      showToast('海报已保存! 📸', 'success');
+    }
+
+    async function shareToWhatsApp() {
+      if (!posterCanvas.value) return;
+      const blob = await new Promise(resolve => posterCanvas.value.toBlob(resolve, 'image/png'));
+      const file = new File([blob], 'my-wealth-arab-tycoon.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: '阿拉伯土豪模拟器',
+            text: `我的总资产: ${fmtFull(totalAssets.value)} AED! 快来挑战我! 🏆`
+          });
+          showToast('分享成功! 📤', 'success');
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            downloadPoster();
+          }
+        }
+      } else if (navigator.share) {
+        try {
+          await navigator.share({
+            title: '阿拉伯土豪模拟器',
+            text: `我的总资产: ${fmtFull(totalAssets.value)} AED! 快来挑战我! 🏆`
+          });
+          showToast('链接已分享! 📤', 'success');
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            downloadPoster();
+          }
+        }
+      } else {
+        downloadPoster();
+      }
+    }
+
+    // ============ GIFT ANIMATION ============
+    function playGiftAnimation(friend, item) {
+      const emojis = ['🎁', '💝', '🎊', '✨', item.icon];
+      for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'gift-particle';
+        particle.textContent = emojis[i % emojis.length];
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 0.5 + 's';
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 2500);
+      }
+
+      // Show notification to friend (simulated)
+      const notif = {
+        id: Date.now(),
+        friend: friend.name,
+        item: item.name,
+        icon: item.icon
+      };
+      giftNotifications.value.push(notif);
+      setTimeout(() => {
+        giftNotifications.value = giftNotifications.value.filter(n => n.id !== notif.id);
+      }, 3000);
+    }
+
+    function sendGiftAnim(item) {
+      if (!giftFriend.value) return;
+      if (cash.value < item.price) {
+        showToast('现金不够！', 'error');
+        return;
+      }
+      cash.value -= item.price;
+      totalSpent.value += item.price;
+      // For fixed gifts, don't add to inventory, just play animation
+      playGiftAnimation(giftFriend.value, item);
+      checkAchievements(); // Check for generous achievement
+      save();
+      showToast(`🎁 送了 ${item.icon} ${item.name} 给 ${giftFriend.value.name}！`, 'success');
+      modal.value = null;
+      giftFriend.value = null;
+    }
+
+    // ============ MULTIPLAYER PK ============
+    function openMultiplayerPK() {
+      modal.value = { type: 'multiplayer-pk' };
+    }
+
+    function startPKMatch(opponent) {
+      pkMatchOpponent.value = opponent;
+      showPKMatch.value = true;
+      pkSearching.value = true;
+
+      // Simulate matching delay
+      setTimeout(() => {
+        pkSearching.value = false;
+        executePK();
+      }, 2000);
+    }
+
+    function executePK() {
+      const myAssets = totalAssets.value;
+      const oppAssets = pkMatchOpponent.value.assets;
+      const win = myAssets > oppAssets;
+
+      if (win) {
+        playerTitle.value = 'PK冠军';
+        titleExpiry.value = Date.now() + 24 * 3600 * 1000;
+        pkWins.value++;
+        checkAchievements();
+        save();
+      }
+
+      pkResultShow.value = {
+        win,
+        opponent: pkMatchOpponent.value,
+        myAssets,
+        oppAssets
+      };
+    }
+
+    function closePKResult() {
+      showPKMatch.value = false;
+      pkResultShow.value = null;
+      pkMatchOpponent.value = null;
+      modal.value = null;
+    }
+
+    // Watch for level changes to trigger level-up overlay
+    let prevLevelIndex = LEVELS.findIndex(l => l.name === level.value.name);
+    watch(totalAssets, () => {
+      const newLevel = getLevel(totalAssets.value);
+      const newIndex = LEVELS.findIndex(l => l.name === newLevel.name);
+      if (newIndex > prevLevelIndex) {
+        triggerLevelUp(newLevel);
+      }
+      prevLevelIndex = newIndex;
+    });
+
+    onUnmounted(() => {
+      if (cdInterval) clearInterval(cdInterval);
+      if (toastTimer) clearTimeout(toastTimer);
+    });
+
+    return {
+      started, activeTab, shopTab, lbTab, view,
+      cash, ownedItems, totalAssets, level, nextLevel, levelProgress, displayTitle,
+      workCD, businessCD, investCD, canWork, canBusiness, canInvest,
+      leaderboard, leaderboardByCategory, friends, ownedItemsList, currentShopItems,
+      dailyTaskProgress, allDailyTasksDone, achievementsWithStatus,
+      modal, toast, giftFriend, dailyTasksTab,
+      showAchievementUnlock,
+      fmt, fmtFull, fmtCD, getLevel,
+      currentLang, isRtl, t,
+      startGame, goShop, goBack,
+      doWork, doBusiness, doInvest,
+      confirmInvest,
+      buyItem, confirmBuy,
+      visitFriend, openGift, sendGift, pkFriend,
+      openSharePoster, downloadPoster, shareToWhatsApp,
+      sendGiftAnim,
+      openMultiplayerPK, startPKMatch, closePKResult,
+      showSharePoster, posterCanvas,
+      giftNotifications,
+      showPKMatch, pkMatchOpponent, pkResultShow, pkSearching,
+      AI_OPPONENTS,
+      // Territory System
+      ownedTerritories, territoriesTab, territories, lordRanks: LORD_RANKS,
+      buyTerritory, getLordRank, getLordRankBonus, getTerritoryIncome, collectRentalIncome, rentalIncome, rentalEnabled,
+      // Daily Signin
+      signinRewards: SIGNIN_REWARDS, lastSigninDate, signinHistory, canSignin, getSigninDay, doSignin, hasSignedOnDay,
+      // Charity
+      charityOptions: CHARITY_OPTIONS, charityTotal, doCharity,
+      // Friend Profile
+      viewingFriend, visitFriendProfile, closeFriendProfile, likeFriend, likedFriends,
+      // Fixed Gifts
+      fixedGifts: FIXED_GIFTS,
+      // Sound System
+      soundEnabled, toggleSound,
+      // Floating Text
+      floatingTexts,
+      // Level Up Overlay
+      showLevelUpOverlay, levelUpData,
+      // Wealth Chart
+      wealthHistory, getWealthChartData,
+      // AI Advisor
+      showAiAdvisor, aiAdvices, handleAiAdvice,
+    };
+  },
+  template: `
+<!-- ========== START SCREEN ========== -->
+<div v-if="!started" class="start-screen">
+  <div class="start-logo">🏰</div>
+  <div class="start-title">阿拉伯土豪<br>模拟器</div>
+  <div class="start-sub">从1,000迪拉姆起步<br>成为中东最有钱的人！</div>
+  <button class="btn-gold" @click="startGame">开始游戏</button>
+</div>
+
+<!-- ========== GAME SCREEN ========== -->
+<div v-else class="game-screen" :dir="isRtl ? 'rtl' : 'ltr'">
+
+  <!-- Header -->
+  <div class="game-header">
+    <div class="header-top">
+      <button v-if="view === 'shop'" class="back-btn" @click="goBack">←</button>
+      <div class="header-spacer" v-else></div>
+      <div class="header-title">
+        {{ view === 'shop' ? '🛒 商店' : '阿拉伯土豪' }}
+      </div>
+      <div class="lang-switch">
+        <button :class="'lang-btn ' + (currentLang === 'cn' ? 'active' : '')" @click="currentLang = 'cn'">中</button>
+        <button :class="'lang-btn ' + (currentLang === 'en' ? 'active' : '')" @click="currentLang = 'en'">EN</button>
+        <button :class="'lang-btn ' + (currentLang === 'ar' ? 'active' : '')" @click="currentLang = 'ar'">ع</button>
+        <button class="lang-btn" @click="openSharePoster" title="分享海报">📤</button>
+      </div>
+      <button class="sound-toggle" :class="{ muted: !soundEnabled }" @click="toggleSound" :title="soundEnabled ? '音效ON' : '音效OFF'">
+        {{ soundEnabled ? '🔊' : '🔇' }}
+      </button>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar" v-if="view === 'home'">
+      <div class="status-row">
+        <div>
+          <div class="status-label">总资产</div>
+          <div class="status-value">{{ fmtFull(totalAssets) }} AED</div>
+        </div>
+        <div style="text-align:right">
+          <div class="status-label">身份</div>
+          <span :class="'identity-badge ' + level.class">
+            {{ level.name }}{{ level.name === 'Middle East King' ? ' 👑' : '' }}
+          </span>
+        </div>
+      </div>
+      <div class="status-row">
+        <div class="status-label">现金</div>
+        <div class="status-value cash">{{ fmtFull(cash) }} AED</div>
+      </div>
+      <div v-if="displayTitle" class="status-row">
+        <div class="status-label">称号</div>
+        <div style="color:var(--gold);font-size:12px;font-weight:700">🏅 {{ displayTitle }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HOME VIEW ========== -->
+  <template v-if="view === 'home'">
+
+    <!-- Level Progress -->
+    <div class="level-progress-section">
+      <div class="level-info">
+        <span>{{ level.name }}</span>
+        <span v-if="nextLevel">{{ nextLevel.name }}: {{ fmtFull(nextLevel.threshold) }} AED</span>
+        <span v-else>满级 👑</span>
+      </div>
+      <div class="level-bar-wrap">
+        <div class="level-bar" :style="{ width: levelProgress + '%' }"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div :class="'tab ' + (activeTab === 'home' ? 'active' : '')" @click="activeTab = 'home'">主页</div>
+      <div :class="'tab ' + (activeTab === 'leaderboard' ? 'active' : '')" @click="activeTab = 'leaderboard'">排行榜</div>
+      <div :class="'tab ' + (activeTab === 'friends' ? 'active' : '')" @click="activeTab = 'friends'">好友</div>
+      <div :class="'tab ' + (activeTab === 'tasks' ? 'active' : '')" @click="activeTab = 'tasks'">任务</div>
+      <div :class="'tab ' + (activeTab === 'territory' ? 'active' : '')" @click="activeTab = 'territory'">领主</div>
+    </div>
+
+    <!-- Tab: Home -->
+    <div class="tab-content" v-if="activeTab === 'home'">
+      <div class="section-title">💰 赚钱</div>
+      <div class="earn-grid">
+        <!-- Work -->
+        <div class="earn-btn" :class="{ disabled: !canWork }">
+          <div class="earn-icon">🏢</div>
+          <div class="earn-info">
+            <div class="earn-name">工作</div>
+            <div class="earn-reward">+1,000 AED</div>
+            <div class="earn-cooldown" v-if="!canWork">冷却: {{ fmtCD(workCD) }}</div>
+          </div>
+          <button class="earn-action" :class="{ 'cooldown-btn': !canWork }" @click="doWork">
+            {{ canWork ? '执行' : fmtCD(workCD) }}
+          </button>
+        </div>
+
+        <!-- Business -->
+        <div class="earn-btn" :class="{ disabled: !canBusiness }">
+          <div class="earn-icon">🛒</div>
+          <div class="earn-info">
+            <div class="earn-name">做生意</div>
+            <div class="earn-reward">+10,000 AED</div>
+            <div class="earn-cooldown" v-if="!canBusiness">冷却: {{ fmtCD(businessCD) }}</div>
+          </div>
+          <button class="earn-action" :class="{ 'cooldown-btn': !canBusiness }" @click="doBusiness">
+            {{ canBusiness ? '执行' : fmtCD(businessCD) }}
+          </button>
+        </div>
+
+        <!-- Oil Investment -->
+        <div class="earn-btn" :class="{ disabled: !canInvest }">
+          <div class="earn-icon">🛢️</div>
+          <div class="earn-info">
+            <div class="earn-name">石油投资</div>
+            <div class="earn-reward">+1,000,000 AED or -50%</div>
+            <div class="earn-cooldown" v-if="!canInvest">冷却: {{ fmtCD(investCD) }}</div>
+          </div>
+          <button class="earn-action" :class="{ 'cooldown-btn': !canInvest }" @click="doInvest">
+            {{ canInvest ? '投资!' : fmtCD(investCD) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Wealth Chart -->
+      <div class="wealth-chart-section" v-if="wealthHistory.length > 0">
+        <div class="wealth-chart-title">
+          <span>📈 财富增长</span>
+          <span style="font-size:10px;color:var(--text-dim)">最近{{ wealthHistory.length }}条记录</span>
+        </div>
+        <div class="wealth-chart-container">
+          <div v-for="(bar, idx) in getWealthChartData()" :key="idx"
+            class="wealth-bar"
+            :style="{ height: bar.height + '%' }"
+            :data-value="fmt(bar.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Advisor -->
+      <div class="ai-advisor-section">
+        <div class="ai-advisor-header">
+          <div class="ai-avatar">🤖</div>
+          <div class="ai-info">
+            <div class="ai-name">AI 投资顾问</div>
+            <div class="ai-status">● 在线</div>
+          </div>
+          <button @click="showAiAdvisor = !showAiAdvisor" style="background:none;border:none;color:var(--gold);font-size:20px;cursor:pointer">
+            {{ showAiAdvisor ? '−' : '+' }}
+          </button>
+        </div>
+        <div v-if="showAiAdvisor" class="ai-advice-list">
+          <div v-if="aiAdvices.length === 0" class="ai-thinking">
+            <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+            <span>分析中...</span>
+          </div>
+          <div v-for="(advice, idx) in aiAdvices" :key="idx"
+            class="ai-advice-item"
+            @click="handleAiAdvice(advice)">
+            <span class="advice-icon">{{ advice.icon }}</span>
+            {{ advice.text }}
+          </div>
+        </div>
+        <div v-else class="ai-tip">点击展开获取投资建议</div>
+      </div>
+
+      <!-- Owned Items -->
+      <div class="section-title">🛍️ 已拥有物品</div>
+      <div class="owned-list">
+        <div v-if="ownedItemsList.length === 0" class="empty-msg">还没有物品，去商店逛逛吧！</div>
+        <div v-for="item in ownedItemsList" :key="item.id" class="owned-item">
+          <span class="item-icon">{{ item.icon }}</span>
+          <span class="item-name">{{ item.name }}</span>
+        </div>
+      </div>
+
+      <!-- Daily Signin -->
+      <div class="section-title">📅 每日签到</div>
+      <div class="signin-grid">
+        <div v-for="(reward, idx) in signinRewards" :key="idx"
+          :class="'signin-day ' + (hasSignedOnDay(reward.day) ? 'checked' : '') + (idx === getSigninDay() - 1 && canSignin() ? ' today' : '')"
+          :style="hasSignedOnDay(reward.day) ? 'background:#1a3a1a;border-color:#4caf50' : ''">
+          <div class="signin-day-icon">{{ reward.icon }}</div>
+          <div class="signin-day-label">第{{ reward.day }}天</div>
+          <div class="signin-reward">+{{ fmtFull(reward.reward) }}</div>
+        </div>
+      </div>
+      <button v-if="canSignin()" class="btn-gold" style="width:100%;margin:10px 0;padding:12px" @click="doSignin">
+        🎁 立即签到领取 {{ fmtFull(signinRewards[getSigninDay() - 1].reward) }} AED
+      </button>
+      <div v-else style="text-align:center;color:var(--text-dim);font-size:12px;margin:10px 0">
+        今日已签到 ✅ 明天再来吧！
+      </div>
+
+      <!-- Property Rental Income -->
+      <div class="rental-section" v-if="ownedTerritories.length > 0">
+        <div class="rental-header">
+          <div class="rental-title">🏜️ 领地收租</div>
+          <button :class="'rental-toggle ' + (rentalEnabled ? 'on' : 'off')" @click="rentalEnabled = !rentalEnabled">
+            {{ rentalEnabled ? '自动' : '手动' }}
+          </button>
+        </div>
+        <div class="rental-income">
+          <div>每Tick收入: <span class="rental-amount">+{{ fmtFull(getTerritoryIncome()) }} AED</span></div>
+          <button class="btn-gold" style="width:100%;margin-top:10px;padding:10px;font-size:13px" @click="collectRentalIncome">
+            💰 领取领地收入
+          </button>
+        </div>
+      </div>
+
+      <!-- Charity System -->
+      <div class="charity-section">
+        <div class="charity-title">🤝 慈善捐赠</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">
+          捐赠可获得额外奖励！累计捐赠: {{ fmtFull(charityTotal) }} AED
+        </div>
+        <div class="charity-options">
+          <button v-for="opt in charityOptions" :key="opt.id"
+            :class="'charity-btn ' + opt.id.replace('charity_', '')"
+            :style="cash < opt.amount ? 'opacity:0.5;cursor:not-allowed' : ''"
+            :disabled="cash < opt.amount"
+            @click="doCharity(opt)">
+            <div>{{ opt.icon }}</div>
+            <div>{{ opt.name }}</div>
+            <div style="font-size:10px;color:var(--gold)">-{{ fmtFull(opt.amount) }}</div>
+            <div style="font-size:10px;color:var(--green)">+{{ fmtFull(opt.bonus) }}</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Leaderboard (inline) -->
+    <div class="tab-content" v-if="activeTab === 'leaderboard'">
+      <div class="lb-tabs">
+        <div v-for="cat in ['总资产','汽车','房产','宠物','奢侈品']" :key="cat"
+          :class="'lb-tab ' + (lbTab === cat ? 'active' : '')"
+          @click="lbTab = cat">{{ cat }}</div>
+      </div>
+      <div class="lb-list">
+        <div v-for="row in leaderboardByCategory" :key="row.name" class="lb-row" :class="{ 'is-you': row.isYou }">
+          <div :class="'lb-rank ' + (row.rank === 1 ? 'gold' : row.rank === 2 ? 'silver' : row.rank === 3 ? 'bronze' : '')">
+            {{ row.rank <= 3 ? ['🥇','🥈','🥉'][row.rank-1] : '#' + row.rank }}
+          </div>
+          <div class="lb-emoji">{{ row.emoji }}</div>
+          <div class="lb-info">
+            <div class="lb-name">{{ row.name }}{{ row.isYou ? ' (你)' : '' }}</div>
+            <span :class="'identity-badge ' + getLevel(row.assets).class" style="font-size:10px">
+              {{ getLevel(row.assets).name }}
+            </span>
+          </div>
+          <div class="lb-assets">{{ fmtFull(row.assets) }} AED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Friends (inline) -->
+    <div class="tab-content" v-if="activeTab === 'friends'">
+      <div class="friends-list">
+        <div v-for="friend in friends" :key="friend.id" class="friend-card">
+          <div class="friend-top">
+            <div class="friend-avatar">{{ friend.emoji }}</div>
+            <div class="friend-info">
+              <div class="friend-name">{{ friend.name }}</div>
+              <div class="friend-assets">{{ fmtFull(friend.assets) }} AED</div>
+              <span :class="'identity-badge ' + friend.level.class" style="font-size:10px">{{ friend.level.name }}</span>
+            </div>
+          </div>
+          <div class="friend-actions">
+            <button class="friend-action-btn btn-visit" @click="visitFriendProfile(friend)">拜访</button>
+            <button class="friend-action-btn btn-gift" @click="openGift(friend)">送礼</button>
+            <button class="friend-action-btn btn-pk" @click="pkFriend(friend)">PK</button>
+          </div>
+          <button class="friend-action-btn" style="width:100%;margin-top:8px;background:#2a1a3a;border-color:#7a4aaa;color:#b87ae8" @click="openMultiplayerPK">⚔️ 多人PK</button>
+        </div>
+      </div>
+
+      <!-- Multiplayer PK Section -->
+      <div class="multiplayer-section">
+        <div class="section-divider"></div>
+        <div class="section-title">⚔️ 多人PK挑战</div>
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">与AI对手进行财富对决</div>
+        <div v-for="opp in AI_OPPONENTS" :key="opp.id" class="ai-opponent-card">
+          <div style="font-size:36px">{{ opp.emoji }}</div>
+          <div class="ai-opponent-info">
+            <div class="ai-opponent-name">{{ opp.name }}</div>
+            <div class="ai-opponent-assets">{{ fmtFull(opp.assets) }} AED</div>
+          </div>
+          <button class="btn-challenge" @click="startPKMatch(opp)">挑战</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Tasks & Achievements -->
+    <div class="tab-content" v-if="activeTab === 'tasks'">
+      <div class="tabs" style="margin-bottom:15px">
+        <div :class="'lb-tab ' + (dailyTasksTab === 'tasks' ? 'active' : '')" @click="dailyTasksTab = 'tasks'">每日任务</div>
+        <div :class="'lb-tab ' + (dailyTasksTab === 'achievements' ? 'active' : '')" @click="dailyTasksTab = 'achievements'">成就</div>
+      </div>
+
+      <!-- Daily Tasks -->
+      <div v-if="dailyTasksTab === 'tasks'">
+        <div v-for="task in dailyTaskProgress" :key="task.id" style="background:#1e1a14;padding:12px;margin:8px 0;border-radius:10px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <span style="font-size:20px">{{ task.done ? '✅' : '📋' }}</span>
+            <div style="flex:1">
+              <div style="font-weight:bold">{{ currentLang === 'cn' ? task.name : currentLang === 'en' ? task.nameEn : task.nameAr }}</div>
+              <div style="font-size:12px;color:#a09080">{{ currentLang === 'cn' ? task.desc : currentLang === 'en' ? task.desc : task.desc }}</div>
+            </div>
+            <span style="color:#D4AF37;font-weight:bold">+{{ fmtFull(task.reward) }}</span>
+          </div>
+          <div style="background:#333;border-radius:5px;height:6px;overflow:hidden">
+            <div :style="'width:' + (task.progress / task.target * 100) + '%;height:100%;background:' + (task.done ? '#4caf50' : '#D4AF37') + ';transition:width 0.3s'"></div>
+          </div>
+          <div style="font-size:11px;color:#a09080;margin-top:4px;text-align:right">{{ task.progress }}/{{ task.target }}</div>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <div v-if="dailyTasksTab === 'achievements'">
+        <div v-for="ach in achievementsWithStatus" :key="ach.id" :style="ach.unlocked ? 'background:#1e1a14;padding:12px;margin:8px 0;border-radius:10px' : 'background:#1e1a14;padding:12px;margin:8px 0;border-radius:10px;opacity:0.5'">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:28px">{{ ach.unlocked ? ach.icon : '🔒' }}</span>
+            <div style="flex:1">
+              <div style="font-weight:bold">{{ currentLang === 'cn' ? ach.name : currentLang === 'en' ? ach.nameEn : ach.nameAr }}</div>
+              <div style="font-size:12px;color:#a09080">{{ ach.desc }}</div>
+            </div>
+            <span v-if="ach.unlocked" style="color:#4caf50">已解锁</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Territory / Lord System -->
+    <div class="tab-content" v-if="activeTab === 'territory'">
+      <!-- Lord Rank Display -->
+      <div :class="'lord-rank-card ' + (getLordRank().id !== 'lord_commoner' ? 'current' : '')" style="margin-bottom:15px">
+        <div style="font-size:48px">{{ getLordRank().icon }}</div>
+        <div class="lord-rank-info">
+          <div class="lord-rank-name">{{ getLordRank().name }}</div>
+          <div class="lord-rank-req">领地价值: {{ fmtFull(ownedTerritories.reduce((sum, tId) => { const t = territories.find(ter => ter.id === tId); return sum + (t ? t.price : 0); }, 0)) }} AED</div>
+          <div class="lord-rank-reward">{{ getLordRank().bonus }}</div>
+        </div>
+      </div>
+
+      <!-- Territory Stats -->
+      <div class="territory-stats">
+        <div class="territory-stat">
+          <div class="territory-stat-value">{{ ownedTerritories.length }}</div>
+          <div class="territory-stat-label">已拥有领土</div>
+        </div>
+        <div class="territory-stat">
+          <div class="territory-stat-value">{{ fmtFull(getTerritoryIncome()) }}</div>
+          <div class="territory-stat-label">每小时收入</div>
+        </div>
+        <div class="territory-stat">
+          <div class="territory-stat-value">{{ lordRanks.findIndex(r => r.id === getLordRank().id) + 1 }}/5</div>
+          <div class="territory-stat-label">领主等级</div>
+        </div>
+      </div>
+
+      <!-- Territory Tabs -->
+      <div class="tabs" style="margin-bottom:15px">
+        <div :class="'lb-tab ' + (territoriesTab === 'territories' ? 'active' : '')" @click="territoriesTab = 'territories'">领土</div>
+        <div :class="'lb-tab ' + (territoriesTab === 'ranks' ? 'active' : '')" @click="territoriesTab = 'ranks'">领主称号</div>
+      </div>
+
+      <!-- Territory Grid -->
+      <div v-if="territoriesTab === 'territories'">
+        <div class="territory-grid">
+          <div v-for="ter in territories" :key="ter.id"
+            :class="'territory-card ' + (ownedTerritories.includes(ter.id) ? 'owned' : '')"
+            @click="!ownedTerritories.includes(ter.id) && buyTerritory(ter)">
+            <div class="territory-icon">{{ ter.icon }}</div>
+            <div class="territory-name">{{ currentLang === 'cn' ? ter.name : ter.nameEn }}</div>
+            <div class="territory-income" v-if="!ownedTerritories.includes(ter.id)">+{{ fmtFull(ter.income) }}/h</div>
+            <div class="territory-income" v-else style="color:var(--gold)">已拥有</div>
+            <div v-if="!ownedTerritories.includes(ter.id)" class="territory-price">{{ fmtFull(ter.price) }} AED</div>
+            <div v-else class="territory-owned-badge">领主</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lord Ranks -->
+      <div v-if="territoriesTab === 'ranks'">
+        <div v-for="rank in lordRanks" :key="rank.id" :class="'lord-rank-card ' + (rank.id === getLordRank().id ? 'current' : '')">
+          <div style="font-size:36px">{{ rank.icon }}</div>
+          <div class="lord-rank-info">
+            <div class="lord-rank-name">{{ rank.name }}</div>
+            <div class="lord-rank-req">需要领地价值: {{ fmtFull(rank.territoryValue) }} AED</div>
+            <div class="lord-rank-reward">效果: {{ rank.bonus }}</div>
+          </div>
+          <div v-if="rank.id === getLordRank().id" class="lord-rank-status unlocked">当前</div>
+          <div v-else-if="rank.id !== 'lord_commoner' && (rank.territoryValue <= ownedTerritories.reduce((sum, tId) => { const t = territories.find(ter => ter.id === tId); return sum + (t ? t.price : 0); }, 0))" class="lord-rank-status unlocked">已解锁</div>
+          <div v-else class="lord-rank-status locked">未解锁</div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ========== SHOP VIEW ========== -->
+  <div v-if="view === 'shop'" style="padding:20px;color:#D4AF37">
+    <div style="text-align:center;margin-bottom:15px">商店</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:15px;flex-wrap:wrap">
+      <span v-for="cat in ['汽车','房产','宠物','奢侈品']" :key="cat"
+        :style="shopTab === cat ? 'padding:5px 12px;background:#D4AF37;color:#000;border-radius:20px;cursor:pointer' : 'padding:5px 12px;background:#333;color:#fff;border-radius:20px;cursor:pointer'"
+        @click="shopTab = cat">{{ cat }}</span>
+    </div>
+    <div>
+      <div v-for="item in currentShopItems" :key="item.id" style="background:#1e1a14;padding:12px;margin:8px 0;border-radius:10px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:28px">{{ item.icon }}</span>
+        <div style="flex:1">
+          <div style="font-weight:bold">{{ item.name }}</div>
+          <div style="color:#D4AF37;font-size:12px">{{ fmtFull(item.price) }} 迪拉姆</div>
+        </div>
+        <button v-if="ownedItems.includes(item.id)" style="padding:6px 12px;background:#2a3a2a;color:#6caf6c;border:none;border-radius:15px;font-size:12px;cursor:default">已拥有</button>
+        <button v-else-if="cash < item.price" style="padding:6px 12px;background:#333;color:#666;border:none;border-radius:15px;font-size:12px;cursor:not-allowed">买不起</button>
+        <button v-else style="padding:6px 12px;background:#D4AF37;color:#000;border:none;border-radius:15px;font-size:12px;cursor:pointer" @click="buyItem(item)">购买</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop Button -->
+  <div class="shop-btn-fixed" v-if="view === 'home'">
+    <button class="btn-shop-main" @click="goShop">🛒 商店 — 购买汽车、房产、宠物和奢侈品</button>
+  </div>
+
+</div>
+
+<!-- ========== MODAL ========== -->
+<div v-if="modal" class="modal-overlay" @click.self="modal = null">
+
+  <!-- Invest Confirm -->
+  <div v-if="modal.type === 'invest-confirm'" class="modal">
+    <div class="modal-icon">🛢️</div>
+    <div class="modal-title">石油投资</div>
+    <div class="modal-text">50%概率赢取 +1,000,000 迪拉姆<br>50%概率损失50%的现金<br><br>这是高风险投资！</div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" @click="modal = null">取消</button>
+      <button class="modal-btn modal-btn-confirm" @click="confirmInvest">我了解</button>
+    </div>
+  </div>
+
+  <!-- Invest Result -->
+  <div v-if="modal.type === 'invest-result'" class="modal">
+    <div class="modal-icon">{{ modal.won ? '💰' : '📉' }}</div>
+    <div class="modal-title">{{ modal.won ? '你赢了!' : '你输了...' }}</div>
+    <div class="modal-text">
+      <template v-if="modal.won">油井喷金了！<br>+1,000,000 迪拉姆</template>
+      <template v-else>投资失败了。<br>-{{ fmtFull(modal.loss) }} 迪拉姆</template>
+    </div>
+    <button class="modal-btn modal-btn-ok" @click="modal = null">确定</button>
+  </div>
+
+  <!-- Buy Confirm -->
+  <div v-if="modal.type === 'buy-confirm'" class="modal">
+    <div class="modal-icon">{{ modal.item.icon }}</div>
+    <div class="modal-title">确认购买</div>
+    <div class="modal-text">购买 <strong>{{ modal.item.name }}</strong><br>价格 <strong style="color:var(--gold)">{{ fmtFull(modal.item.price) }} 迪拉姆</strong>？</div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" @click="modal = null">取消</button>
+      <button class="modal-btn modal-btn-confirm" @click="confirmBuy">购买</button>
+    </div>
+  </div>
+
+  <!-- Gift Select -->
+  <div v-if="modal.type === 'gift-select'" class="modal" style="max-width:380px">
+    <div class="modal-icon">🎁</div>
+    <div class="modal-title">送给 {{ giftFriend?.name }} 的礼物</div>
+    <div class="modal-text">选择一件礼物送给他</div>
+    <div class="gift-grid">
+      <div v-for="gift in fixedGifts" :key="gift.id"
+        class="gift-option"
+        :class="{ disabled: cash < gift.price }"
+        @click="cash >= gift.price && sendGiftAnim(gift)">
+        <div class="gift-option-icon">{{ gift.icon }}</div>
+        <div class="gift-option-name">{{ gift.name }}</div>
+        <div class="gift-option-price">{{ fmtFull(gift.price) }} AED</div>
+      </div>
+    </div>
+    <button class="modal-btn modal-btn-cancel" @click="modal = null; giftFriend = null" style="width:100%">取消</button>
+  </div>
+
+  <!-- PK Result -->
+  <div v-if="modal.type === 'pk-result'" class="modal">
+    <div class="modal-icon">{{ modal.win ? '🏆' : '😢' }}</div>
+    <div class="modal-result" :class="modal.win ? 'result-win' : 'result-lose'">
+      {{ modal.win ? '你赢了!' : '你输了!' }}
+    </div>
+    <div class="modal-text">
+      <template v-if="modal.win">
+        你比 {{ modal.friend.name }} 有钱！<br>你获得了称号：<strong style="color:var(--gold)">🏅 小土豪</strong><br>(有效期3天)
+      </template>
+      <template v-else>
+        {{ modal.friend.name }} 比你有钱。<br>继续赚钱，再试试吧！
+      </template>
+    </div>
+    <button class="modal-btn modal-btn-ok" @click="modal = null">确定</button>
+  </div>
+
+  <!-- Multiplayer PK -->
+  <div v-if="modal.type === 'multiplayer-pk'" class="modal" style="max-width:380px">
+    <div class="modal-icon">⚔️</div>
+    <div class="modal-title">多人PK挑战</div>
+    <div class="modal-text">选择对手进行财富对决</div>
+    <div style="max-height:300px;overflow-y:auto">
+      <div v-for="opp in AI_OPPONENTS" :key="opp.id" class="ai-opponent-card">
+        <div style="font-size:36px">{{ opp.emoji }}</div>
+        <div class="ai-opponent-info">
+          <div class="ai-opponent-name">{{ opp.name }}</div>
+          <div class="ai-opponent-assets">{{ fmtFull(opp.assets) }} AED</div>
+        </div>
+        <button class="btn-challenge" @click="startPKMatch(opp); modal = null">挑战</button>
+      </div>
+    </div>
+    <button class="modal-btn modal-btn-cancel" @click="modal = null" style="width:100%;margin-top:12px">关闭</button>
+  </div>
+
+  <!-- Friend Profile View -->
+  <div v-if="viewingFriend" class="friend-profile-overlay" style="position:fixed;inset:0;background:var(--bg);z-index:150;overflow-y:auto">
+    <div class="friend-profile-header">
+      <button class="back-btn" @click="closeFriendProfile" style="position:absolute;top:10px;left:10px">←</button>
+      <div class="friend-profile-avatar">{{ viewingFriend.emoji }}</div>
+      <div class="friend-profile-name">{{ viewingFriend.name }}</div>
+      <span :class="'identity-badge ' + viewingFriend.level.class">{{ viewingFriend.level.name }}</span>
+    </div>
+
+    <div class="friend-profile-stats">
+      <div class="friend-stat">
+        <div class="friend-stat-value">{{ fmtFull(viewingFriend.assets) }}</div>
+        <div class="friend-stat-label">总资产</div>
+      </div>
+      <div class="friend-stat">
+        <div class="friend-stat-value">{{ viewingFriend.level.name }}</div>
+        <div class="friend-stat-label">身份</div>
+      </div>
+    </div>
+
+    <div class="friend-inventory-section" style="padding:10px">
+      <div class="friend-inventory-title">🏠 {{ viewingFriend.name }} 的收藏</div>
+      <div class="friend-inventory-grid">
+        <div v-for="i in 6" :key="i" class="friend-inventory-item">
+          <div class="friend-inventory-icon">{{ ['🚗','🏎️','🏠','🦅','💎','⌚'][i-1] }}</div>
+          <div class="friend-inventory-name">{{ ['豪车','跑车','豪宅','猎鹰','钻石','名表'][i-1] }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:10px">
+      <button class="like-btn" @click="likeFriend(viewingFriend)" :disabled="likedFriends.has(viewingFriend.id)">
+        {{ likedFriends.has(viewingFriend.id) ? '已点赞 ✓' : '👍 点赞 (+50 AED)' }}
+      </button>
+      <button class="friend-action-btn btn-gift" style="width:100%;margin-top:10px" @click="openGift(viewingFriend)">🎁 送礼</button>
+      <button class="friend-action-btn btn-pk" style="width:100%;margin-top:10px" @click="pkFriend(viewingFriend)">⚔️ PK挑战</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Level Up Overlay -->
+<div v-if="showLevelUpOverlay" class="levelup-overlay">
+  <div class="levelup-content">
+    <div class="levelup-icon">🎉</div>
+    <div class="levelup-text">升级!</div>
+    <div class="levelup-title">{{ levelUpData?.name }}</div>
+  </div>
+</div>
+
+<!-- Floating Texts -->
+<div v-for="ft in floatingTexts" :key="ft.id"
+  class="float-text"
+  :class="ft.type"
+  :style="{ left: ft.x + 'px', top: ft.y + 'px' }">
+  {{ ft.text }}
+</div>
+
+<!-- Toast -->
+<div v-if="toast" class="toast" :class="'toast-' + toast.type">{{ toast.msg }}</div>
+
+<!-- ========== SHARE POSTER ========== -->
+<div v-if="showSharePoster" class="share-poster-overlay" @click.self="showSharePoster = false">
+  <div class="share-poster-preview">
+    <canvas ref="posterCanvas" width="270" height="480" style="width:100%;height:auto;display:block"></canvas>
+  </div>
+  <div class="share-poster-actions">
+    <button class="share-action-btn btn-whatsapp" @click="shareToWhatsApp">📤 WhatsApp</button>
+    <button class="share-action-btn btn-download" @click="downloadPoster">💾 下载</button>
+    <button class="share-action-btn btn-close-share" @click="showSharePoster = false">关闭</button>
+  </div>
+</div>
+
+<!-- ========== GIFT ANIMATION ========== -->
+<div v-if="giftNotifications.length > 0" class="gift-animation-overlay">
+</div>
+<div v-for="notif in giftNotifications" :key="notif.id" class="gift-notification">
+  <span class="notif-icon">{{ notif.icon }}</span>
+  <span class="notif-text">你收到了 {{ notif.friend }} 送的 {{ notif.item }}!</span>
+</div>
+
+<!-- ========== PK MATCHMAKING ========== -->
+<div v-if="showPKMatch && pkSearching" class="pk-match-overlay">
+  <div class="pk-match-title">⚔️ 匹配中</div>
+  <div class="pk-spinner"></div>
+  <div class="pk-match-text">正在匹配对手...</div>
+</div>
+
+<div v-if="pkResultShow" class="pk-result-overlay">
+  <div class="pk-result-effect">{{ pkResultShow.win ? '🏆' : '😢' }}</div>
+  <div class="pk-result-title" :class="pkResultShow.win ? 'pk-result-win' : 'pk-result-lose'">
+    {{ pkResultShow.win ? '胜利!' : '失败...' }}
+  </div>
+  <div class="pk-vs-display">
+    <div class="pk-player-card">
+      <div class="pk-player-emoji">😎</div>
+      <div class="pk-player-name">你</div>
+      <div class="pk-player-assets">{{ fmtFull(pkResultShow.myAssets) }} AED</div>
+    </div>
+    <div class="pk-vs">VS</div>
+    <div class="pk-player-card">
+      <div class="pk-player-emoji">{{ pkResultShow.opponent.emoji }}</div>
+      <div class="pk-player-name">{{ pkResultShow.opponent.name }}</div>
+      <div class="pk-player-assets">{{ fmtFull(pkResultShow.oppAssets) }} AED</div>
+    </div>
+  </div>
+  <div class="pk-result-assets" v-if="pkResultShow.win">
+    🏅 获得称号: PK冠军 (24小时)
+  </div>
+  <button class="close-pk-btn" @click="closePKResult">确定</button>
+</div>
+
+  `
+}).mount('#app');
+</script>
+</body>
+</html>
