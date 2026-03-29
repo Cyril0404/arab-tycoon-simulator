@@ -703,3 +703,299 @@ const DEFAULT_USER_DATA = {
 | 每次驻扎消耗 | 1个战争债券 |
 | 进攻胜利奖励 | 抢夺对方最贵地块 |
 | 防守胜利奖励 | 全城收租+20%（7天）|
+
+---
+
+## 19. 打工系统 v2.0（Enhanced Work System）
+
+> 本章节为打工系统全面重设计，结合放置游戏+人脉社交元素，参考：Adventure Capitalist、Cookie Clicker、土豪模拟器原版设计。
+
+### 19.1 设计理念
+
+原版打工系统问题：只有1个按钮、1种收益、无策略深度、容易无聊。
+
+新打工系统核心设计原则：
+- **多层次**：打工类型随资产规模解锁，渐进式深度
+- **惊喜感**：每次打工有概率触发人脉事件
+- **连击反馈**：连续点击有视觉+数值奖励
+- **被动收入**：员工系统让玩家可以"挂着玩"
+- **进度感**：打工等级系统提供长期刷的动力
+
+---
+
+### 19.2 打工类型（按资产规模解锁）
+
+| 工作ID | 名称 | 解锁门槛（总资产）| 基础收益 | CD时间 | 说明 |
+|--------|------|----------------|---------|--------|------|
+| work_carpet | 地毯店 | 0 | 50 AED | 60秒 | 新手起步 |
+| work_guide | 沙漠导游 | 100,000 | 200 AED | 60秒 | 小老板专属 |
+| work_oil_sales | 石油销售 | 1,000,000 | 1,000 AED | 60秒 | 财富增长期 |
+| work_realestate | 房产中介 | 10,000,000 | 10,000 AED | 60秒 | 富商阶段 |
+| work_trade | 国际贸易 | 100,000,000 | 100,000 AED | 60秒 | 超级富豪 |
+| work_advisor | 投资顾问 | 1,000,000,000 | 1,000,000 AED | 60秒 | 中东首富 |
+
+**解锁机制：** 当玩家总资产首次达到门槛时，自动解锁对应打工类型，并在屏幕上弹出"新工作解锁！"动画提示。
+
+**策略性：** 玩家可以选择性地只做高收益工作（高门槛），也可以把低门槛工作当作日常小额积累。
+
+---
+
+### 19.3 打工人脉系统（核心创新）
+
+> 每次打工有概率遇到人脉，人脉触发后获得buff或奖励
+
+**触发规则：**
+- 每次打工完成后，以 15% 概率触发人脉事件
+- 人脉触发时弹出专属动画（如金色光圈、角色出场动画）
+
+**人脉类型：**
+
+| 人脉ID | 人脉名称 | 触发概率 | 效果 | 持续时间 |
+|--------|---------|---------|------|---------|
+| contact_merchant | 本地商人 | 4% | 做生意收益 +20% | 3次做生意 |
+| contact_oil | 石油大亨 | 2% | 石油投资成功率 +10%（+10%永久）| 永久（可叠加3次）|
+| contact_official | 政府官员 | 2% | 所有商品价格 9折 | 1次购买 |
+| contact_influencer | 网红博主 | 3% | 分享奖励 AED 翻倍 | 1次分享 |
+| contact_friend | 明星朋友 | 2% | 好友互动经验 +50% | 3次好友互动 |
+| contact_mystery | 神秘商人 | 2% | 随机获得 1,000~100,000 AED | 即时 |
+
+**人脉叠加规则：**
+- 石油大亨效果可叠加（遇到3次 = 成功率从50%→70%→80%→90%，上限90%）
+- 其他效果为一次性，不叠加
+- 效果消耗完毕后在下次打工时可能再次触发
+
+**人脉展示：**
+- Home 界面顶部显示当前持有的人脉buff（图标+剩余次数）
+- 倒计时/次数用金色小字显示
+
+---
+
+### 19.4 连击系统（Combo）
+
+**机制：**
+```
+打工1次 → 基础收益
+打工3次（每次在CD内完成） → 触发 Combo x1.5 + 显示 🔥
+打工10次（每次在CD内完成） → 触发 Combo x2 + 解锁「加班模式」
+```
+
+**加班模式：**
+- 激活后打工变为自动触发（每秒1次）
+- 不需要手动点击
+- 画面出现"加班中"动画效果
+- 随时可手动关闭
+- 关闭后Combo清零
+
+**连击计数器：**
+- 屏幕右上角显示 Combo 计数（🔥×12）
+- 达到10次时触发全屏金色特效
+
+**Combo失效条件：**
+- 打工CD结束但未点击（等待超过CD时间）
+- 手动关闭加班模式
+- 切换到其他Tab（暂停）
+
+---
+
+### 19.5 打工升级系统
+
+**打工等级：**
+- 每次打工获得 1 点「打工经验」
+- 打工经验累计升级打工等级
+- 打工等级影响所有打工类型的收益倍率
+
+**打工等级表：**
+
+| 打工等级 | 累计打工次数 | 收益倍率 | 解锁内容 |
+|---------|------------|---------|---------|
+| Lv.1 | 0 | ×1.0 | 初始 |
+| Lv.2 | 50次 | ×1.2 | 打工有概率获得双倍AED |
+| Lv.3 | 200次 | ×1.5 | 打工CD减少20%（48秒）|
+| Lv.4 | 500次 | ×2.0 | 解锁「精英打工」（每次收益×3）|
+| Lv.5 | 1000次 | ×2.5 | 打工CD减少50%（30秒）|
+| Lv.MAX | 5000次 | ×5.0 | 所有打工永久无CD |
+
+---
+
+### 19.6 员工系统（Passive Income）
+
+> 玩家可以雇佣员工，员工每秒自动产生收益，不需要手动点击
+
+**员工类型：**
+
+| 员工ID | 名称 | 价格(AED) | 每秒收益 | 说明 |
+|--------|------|-----------|---------|------|
+| staff_intern | 实习生 | 10,000 | 1 AED/s | 入门级被动收入 |
+| staff_employee | 正式员工 | 100,000 | 10 AED/s | 中级被动收入 |
+| staff_manager | 部门经理 | 1,000,000 | 100 AED/s | 高级被动收入 |
+| staff_director | 总监 | 10,000,000 | 1,000 AED/s | 高级被动收入 |
+| staff_executive | 执行董事 | 100,000,000 | 10,000 AED/s | 土豪专属 |
+| staff_ceo | CEO | 1,000,000,000 | 100,000 AED/s | 终极被动收入 |
+
+**员工购买规则：**
+- 每种员工可以购买多份
+- 每购买1份，价格上涨 15%（通货膨胀）
+- 员工产生的收益自动累加到现金（每1秒结算1次）
+
+**员工管理界面：**
+- Home Tab 新增「员工」按钮
+- 显示当前所有员工数量和每秒总产出
+- 可购买新员工
+- 「员工总产出」显示在顶部状态栏
+
+**被动收入上限（配合主线每日上限）：**
+- 员工每秒产出总计不超过玩家当前等级每日上限的 20%
+
+---
+
+### 19.7 打工系统数据结构
+
+```javascript
+// 打工系统 v2.0 完整数据结构
+const workSystem = {
+  // 打工类型
+  workTypes: {
+    work_carpet:     { name: 'Carpet Shop',     unlock: 0,               baseEarnings: 50,     cooldown: 60 },
+    work_guide:       { name: 'Desert Guide',     unlock: 100_000,          baseEarnings: 200,    cooldown: 60 },
+    work_oil_sales:  { name: 'Oil Sales',        unlock: 1_000_000,        baseEarnings: 1_000,  cooldown: 60 },
+    work_realestate:  { name: 'Real Estate',     unlock: 10_000_000,       baseEarnings: 10_000, cooldown: 60 },
+    work_trade:      { name: 'Intl Trade',      unlock: 100_000_000,      baseEarnings: 100_000,cooldown: 60 },
+    work_advisor:    { name: 'Invest Advisor',  unlock: 1_000_000_000,   baseEarnings: 1_000_000,cooldown: 60 },
+  },
+
+  // 打工人脉效果
+  contacts: {
+    merchant:   { buff: 'business_bonus',     value: 0.2,  remaining: 3 },  // 做生意+20%
+    oilBaron:   { buff: 'oil_success_rate',  value: 0.1,  permanent: true }, // 石油成功率+10%
+    official:   { buff: 'discount',           value: 0.1,  remaining: 1 },  // 9折
+    influencer: { buff: 'share_double',        value: 2.0,  remaining: 1 },  // 分享×2
+    friend:     { buff: 'friend_exp',         value: 0.5,  remaining: 3 },  // 好友经验+50%
+    mystery:    { buff: 'random_cash',         value: null,  remaining: 1 },  // 随机AED
+  },
+
+  // 打工等级
+  workLevel: 1,
+  workExp: 0,
+  workLevelConfig: [
+    { level: 1, exp: 0,     multiplier: 1.0, unlock: null },
+    { level: 2, exp: 50,    multiplier: 1.2, unlock: 'double_chance' },
+    { level: 3, exp: 200,   multiplier: 1.5, unlock: 'cooldown_reduce_20' },
+    { level: 4, exp: 500,   multiplier: 2.0, unlock: 'elite_work' },
+    { level: 5, exp: 1000,  multiplier: 2.5, unlock: 'cooldown_reduce_50' },
+    { level: 6, exp: 5000,   multiplier: 5.0, unlock: 'no_cooldown' },
+  ],
+
+  // Combo状态
+  combo: {
+    count: 0,        // 当前连击数
+    multiplier: 1.0,  // 当前连击倍率
+    overtime: false,   // 加班模式
+  },
+
+  // 员工数据
+  staff: {
+    intern:      { count: 0, basePrice: 10_000,     incomePerSec: 1 },
+    employee:    { count: 0, basePrice: 100_000,    incomePerSec: 10 },
+    manager:     { count: 0, basePrice: 1_000_000,  incomePerSec: 100 },
+    director:    { count: 0, basePrice: 10_000_000, incomePerSec: 1_000 },
+    executive:   { count: 0, basePrice: 100_000_000,incomePerSec: 10_000 },
+    ceo:        { count: 0, basePrice: 1_000_000_000,incomePerSec: 100_000 },
+  },
+
+  // 已解锁打工类型（随资产自动解锁）
+  unlockedWorks: ['work_carpet'],
+};
+
+// 打工执行算法
+function doWork(workType) {
+  // 1. 计算基础收益
+  let earnings = workSystem.workTypes[workType].baseEarnings;
+
+  // 2. 应用打工等级倍率
+  earnings *= getWorkLevelMultiplier();
+
+  // 3. 应用Combo倍率
+  earnings *= getComboMultiplier();
+
+  // 4. 应用人脉buff
+  earnings *= (1 + getContactBonus('business_bonus'));
+
+  // 5. 扣除CD（Lv.5以上无CD）
+  if (!hasUnlocked('no_cooldown')) {
+    applyCooldown(workType);
+  }
+
+  // 6. 获得打工经验
+  addWorkExp(1);
+
+  // 7. 触发人脉判定（15%概率）
+  if (Math.random() < 0.15) {
+    triggerRandomContact();
+  }
+
+  // 8. 更新Combo
+  incrementCombo();
+
+  // 9. 发放收益
+  addCash(earnings);
+
+  return { earnings, combo: combo.count, contact: lastContact };
+}
+```
+
+---
+
+### 19.8 UI 界面设计
+
+**Home Tab 打工区域（新版）：**
+
+```
+┌─────────────────────────────────┐
+│ 💼 打工大厅                      [员工👔] │
+├─────────────────────────────────┤
+│ 🔥 COMBO ×12                    │
+│ ─────────────────────────────── │
+│ [ ] 地毯店      50 AED    ✅    │
+│ [ ] 沙漠导游    200 AED   🔒(需100K)│
+│ [ ] 石油销售    1,000 AED  🔒(需1M)│
+│ ─────────────────────────────── │
+│ 当前倍率: ×2.0（打工Lv.4）        │
+│ 本次收益: +100 AED              │
+│ ─────────────────────────────── │
+│ 人脉buff: 🛢️石油+10% 剩余永久    │
+│ ─────────────────────────────── │
+│ [加班模式: OFF]  [开始加班]      │
+└─────────────────────────────────┘
+```
+
+**员工管理弹窗：**
+
+```
+┌─────────────────────────────────┐
+│ 👔 员工管理                    [×] │
+├─────────────────────────────────┤
+│ 总产出: 1,234 AED/秒            │
+│ ─────────────────────────────── │
+│ 实习生     ×3    +3/s    10K AED │
+│ 员工       ×1   +10/s   100K AED │
+│ 部门经理   ×0    +0/s  1,000K AED│
+│ 总监       ×0    +0/s   10,000K AED│
+│ 执行董事   ×0    +0/s  100,000K AED│
+│ CEO        ×0    +0/s1,000,000K AED│
+│ ─────────────────────────────── │
+│ [雇佣新员工]                    │
+└─────────────────────────────────┘
+```
+
+---
+
+### 19.9 每日打工上限（与主线经济上限联动）
+
+| 玩家身份等级 | 每日主动打工上限 | 员工被动收入上限 |
+|-------------|----------------|----------------|
+| 平民 | 50,000 AED | 20,000 AED |
+| 小老板 | 200,000 AED | 100,000 AED |
+| 富商 | 2,000,000 AED | 1,000,000 AED |
+| 超级富豪 | 20,000,000 AED | 10,000,000 AED |
+| 中东首富 | 无上限 | 20,000,000 AED |
+
