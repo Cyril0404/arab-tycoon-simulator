@@ -732,6 +732,42 @@
       width: 100%;
     }
 
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
     .modal-result {
       font-size: 24px;
       font-weight: 900;
@@ -1494,88 +1530,6 @@
     }
     .sound-toggle.muted { opacity: 0.5; }
 
-    /* ========== AI ADVISOR ========== */
-    .ai-advisor-section {
-      background: linear-gradient(135deg, #1a2a3a 0%, #0a1520 100%);
-      border: 1px solid #3a5a7a;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
-    }
-    .ai-advisor-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-    .ai-avatar {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #42a5f5, #1976d2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .ai-info { flex: 1; }
-    .ai-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .ai-status {
-      font-size: 10px;
-      color: var(--green);
-    }
-    .ai-advice-list { display: flex; flex-direction: column; gap: 8px; }
-    .ai-advice-item {
-      background: rgba(66, 165, 245, 0.1);
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 12px;
-      color: var(--text);
-      line-height: 1.5;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .ai-advice-item:hover {
-      background: rgba(66, 165, 245, 0.2);
-    }
-    .ai-advice-item .advice-icon { margin-right: 6px; }
-    .ai-advice-item .advice-reward {
-      color: var(--gold);
-      font-weight: 600;
-    }
-    .ai-tip {
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: center;
-      margin-top: 8px;
-      font-style: italic;
-    }
-    .ai-thinking {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px;
-      color: var(--text-dim);
-      font-size: 12px;
-    }
-    .ai-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--blue);
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-    .ai-dot:nth-child(2) { animation-delay: 0.2s; }
-    .ai-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-
     /* ========== FLOATING EFFECTS ========== */
     .float-text {
       position: fixed;
@@ -1635,6 +1589,381 @@
       font-size: 16px;
       color: var(--text-dim);
       margin-top: 8px;
+    }
+
+    /* ========== WORK SYSTEM V2.0 ========== */
+    .work-v2-section {
+      margin-bottom: 16px;
+    }
+    .work-v2-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .work-v2-level {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .work-v2-exp-bar {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-card2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .work-v2-exp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      transition: width 0.3s;
+    }
+    .work-v2-exp-text {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .work-v2-combo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .combo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .combo-active {
+      background: linear-gradient(135deg, #ff6b00, #ff9500);
+      color: white;
+    }
+    .combo-inactive {
+      background: var(--bg-card2);
+      color: var(--text-dim);
+    }
+    .combo-fire { animation: firePulse 0.5s ease infinite; }
+    @keyframes firePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    .work-types-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .work-type-card {
+      background: var(--bg-card2);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .work-type-card.unlocked {
+      border-color: var(--gold);
+    }
+    .work-type-card.locked {
+      opacity: 0.5;
+      filter: grayscale(0.5);
+    }
+    .work-type-card.on-cooldown {
+      opacity: 0.7;
+    }
+    .work-type-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .work-type-icon {
+      font-size: 28px;
+    }
+    .work-type-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .work-type-name-en {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .work-type-earnings {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .work-type-cooldown {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .work-type-unlock {
+      font-size: 10px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+    .work-type-btn {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .work-type-btn.do {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+    }
+    .work-type-btn.do:active { transform: scale(0.97); }
+    .work-type-btn.locked {
+      background: var(--gray);
+      color: white;
+      cursor: not-allowed;
+    }
+    .work-type-btn.cooldown {
+      background: var(--bg-card);
+      color: var(--text-dim);
+      cursor: not-allowed;
+    }
+    .overtime-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: var(--bg-card2);
+      border-radius: 8px;
+    }
+    .overtime-toggle label {
+      font-size: 12px;
+      color: var(--text);
+      cursor: pointer;
+      flex: 1;
+    }
+    .toggle-switch {
+      width: 44px;
+      height: 24px;
+      background: var(--bg-card);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.active {
+      background: var(--green);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.2s;
+    }
+    .toggle-switch.active::after {
+      left: 22px;
+    }
+    .work-v2-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .work-footer-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .work-footer-btn:active {
+      background: rgba(212,175,55,0.1);
+    }
+    /* ========== STAFF SYSTEM ========== */
+    .staff-section {
+      background: var(--bg-card2);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .staff-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .staff-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .staff-income {
+      font-size: 12px;
+      color: var(--green);
+    }
+    .staff-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .staff-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      background: var(--bg-card);
+      border-radius: 8px;
+    }
+    .staff-icon { font-size: 24px; }
+    .staff-info { flex: 1; }
+    .staff-name { font-size: 12px; font-weight: 700; }
+    .staff-income-rate { font-size: 10px; color: var(--green); }
+    .staff-owned { font-size: 10px; color: var(--text-dim); }
+    .staff-price {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .staff-buy-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
+    }
+    .staff-buy-btn:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+    }
+    /* ========== OIL FUTURES ========== */
+    .oil-section {
+      background: var(--bg-card2);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .oil-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .oil-title { font-size: 14px; font-weight: 700; color: var(--gold); }
+    .oil-price {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--green);
+    }
+    .oil-price.up { color: var(--green); }
+    .oil-price.down { color: #f44336; }
+    .oil-chart {
+      height: 80px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-end;
+      padding: 4px;
+      gap: 2px;
+      overflow: hidden;
+    }
+    .oil-bar {
+      flex: 1;
+      background: var(--green);
+      border-radius: 2px 2px 0 0;
+      transition: height 0.3s;
+    }
+    .oil-bar.down { background: #f44336; }
+    .oil-position {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .position-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .position-long { background: var(--green); color: white; }
+    .position-short { background: #f44336; color: white; }
+    .position-none { background: var(--bg-card); color: var(--text-dim); }
+    .oil-profit {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .oil-profit.positive { color: var(--green); }
+    .oil-profit.negative { color: #f44336; }
+    .oil-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .oil-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .oil-btn.buy {
+      background: var(--green);
+      color: white;
+    }
+    .oil-btn.sell {
+      background: #f44336;
+      color: white;
+    }
+    .oil-btn.close {
+      background: var(--gold);
+      color: var(--brown);
+    }
+    /* ========== CONTACTS ========== */
+    .contacts-section {
+      margin-top: 12px;
+    }
+    .contacts-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .contacts-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .contact-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      background: var(--bg-card2);
+      border-radius: 20px;
+      font-size: 11px;
+    }
+    .contact-badge.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: var(--brown);
     }
 
   </style>
@@ -1921,6 +2250,42 @@ const CHARITY_OPTIONS = [
   { id: 'charity_large', name: '巨额捐赠', amount: 1000000, bonus: 700000, icon: '💜' },
 ];
 
+// ============ WORK SYSTEM V2.0 ============
+const WORK_TYPES_V2 = [
+  { id: 'carpet', name: '地毯店', nameEn: 'Carpet Shop', icon: '🏪', unlock: 0, baseEarnings: 50, cooldown: 60, desc: '新手起步' },
+  { id: 'guide', name: '沙漠导游', nameEn: 'Desert Guide', icon: '🐪', unlock: 100000, baseEarnings: 200, cooldown: 60, desc: '小老板专属' },
+  { id: 'oil_sales', name: '石油销售', nameEn: 'Oil Sales', icon: '🛢️', unlock: 1000000, baseEarnings: 1000, cooldown: 60, desc: '财富增长期' },
+  { id: 'realestate', name: '房产中介', nameEn: 'Real Estate', icon: '🏠', unlock: 10000000, baseEarnings: 10000, cooldown: 60, desc: '富商阶段' },
+  { id: 'trade', name: '国际贸易', nameEn: 'Intl Trade', icon: '🌍', unlock: 100000000, baseEarnings: 100000, cooldown: 60, desc: '超级富豪' },
+];
+
+const WORK_LEVEL_CONFIG = [
+  { level: 1, exp: 0, multiplier: 1.0, unlock: null },
+  { level: 2, exp: 50, multiplier: 1.2, unlock: 'double_chance' },
+  { level: 3, exp: 200, multiplier: 1.5, unlock: 'cooldown_reduce_20' },
+  { level: 4, exp: 500, multiplier: 2.0, unlock: 'elite_work' },
+  { level: 5, exp: 1000, multiplier: 2.5, unlock: 'cooldown_reduce_50' },
+  { level: 6, exp: 5000, multiplier: 5.0, unlock: 'no_cooldown' },
+];
+
+const STAFF_TYPES = [
+  { id: 'intern', name: '实习生', nameEn: 'Intern', icon: '👤', basePrice: 10000, incomePerSec: 1 },
+  { id: 'employee', name: '正式员工', nameEn: 'Employee', icon: '👔', basePrice: 100000, incomePerSec: 10 },
+  { id: 'manager', name: '部门经理', nameEn: 'Manager', icon: '👨‍💼', basePrice: 1000000, incomePerSec: 100 },
+  { id: 'director', name: '总监', nameEn: 'Director', icon: '👩‍💼', basePrice: 10000000, incomePerSec: 1000 },
+  { id: 'executive', name: '执行董事', nameEn: 'Executive', icon: '🧔', basePrice: 100000000, incomePerSec: 10000 },
+  { id: 'ceo', name: 'CEO', nameEn: 'CEO', icon: '👑', basePrice: 1000000000, incomePerSec: 100000 },
+];
+
+const CONTACTS = [
+  { id: 'merchant', name: '本地商人', nameEn: 'Local Merchant', icon: '🧔', probability: 0.04, buff: 'business_bonus', buffValue: 0.2, remaining: 3, desc: '做生意+20%' },
+  { id: 'oil_baron', name: '石油大亨', nameEn: 'Oil Baron', icon: '🛢️', probability: 0.02, buff: 'oil_success_rate', buffValue: 0.1, permanent: true, desc: '石油成功率+10%' },
+  { id: 'official', name: '政府官员', nameEn: 'Official', icon: '👔', probability: 0.02, buff: 'discount', buffValue: 0.1, remaining: 1, desc: '商品9折' },
+  { id: 'influencer', name: '网红博主', nameEn: 'Influencer', icon: '📱', probability: 0.03, buff: 'share_double', buffValue: 2.0, remaining: 1, desc: '分享奖励×2' },
+  { id: 'friend', name: '明星朋友', nameEn: 'Star Friend', icon: '⭐', probability: 0.02, buff: 'friend_exp', buffValue: 0.5, remaining: 3, desc: '好友经验+50%' },
+  { id: 'mystery', name: '神秘商人', nameEn: 'Mystery Merchant', icon: '🎭', probability: 0.02, buff: 'random_cash', buffValue: null, remaining: 1, desc: '随机AED' },
+];
+
 // ============ DAILY SIGNIN REWARDS ============
 const SIGNIN_REWARDS = [
   { day: 1, reward: 1000, icon: '📦' },
@@ -1931,6 +2296,15 @@ const SIGNIN_REWARDS = [
   { day: 6, reward: 20000, icon: '👑' },
   { day: 7, reward: 50000, icon: '🎉' },
 ];
+
+// ============ OIL FUTURES MINI-GAME ============
+const OIL_FUTURES = {
+  initialPrice: 1000,
+  updateInterval: 30000, // 30 seconds
+  volatility: 0.05, // ±5%
+  trendMomentum: 0.7, // 70% trend continuation
+  historyLength: 20,
+};
 
 // ============ APP ============
 createApp({
@@ -1982,6 +2356,36 @@ createApp({
     const completedTasks = ref([]);
     const dailyTasksTab = ref('tasks'); // tasks | achievements
 
+    // ============ WORK SYSTEM V2.0 ============
+    // Work v2 state
+    const unlockedWorks = ref(['carpet']); // Array of unlocked work type IDs
+    const workCooldowns = ref({}); // { workId: timestamp }
+    const workLevel = ref(1);
+    const workExp = ref(0);
+
+    // Combo system
+    const comboCount = ref(0);
+    const comboMultiplier = ref(1.0);
+    const overtimeMode = ref(false);
+    const lastWorkClick = ref(0); // timestamp of last work click for combo
+    const workClickLock = ref(false); // prevents rapid clicking
+    let overtimeInterval = null;
+
+    // Active contacts (buffs)
+    const activeContacts = ref([]); // [{ id, buff, value, remaining/permanent }]
+
+    // Staff (passive income)
+    const ownedStaff = ref({}); // { staffId: count }
+    let staffInterval = null;
+
+    // Oil futures
+    const oilPrice = ref(OIL_FUTURES.initialPrice);
+    const oilTrend = ref(1); // 1 = up, -1 = down
+    const oilHistory = ref([OIL_FUTURES.initialPrice]);
+    const oilPosition = ref(null); // 'long' | 'short' | null
+    const oilEntryPrice = ref(0);
+    let oilInterval = null;
+
     // Achievements
     const unlockedAchievements = ref([]);
     const pkWins = ref(0);
@@ -1991,6 +2395,10 @@ createApp({
     // Share Poster
     const showSharePoster = ref(false);
     const posterCanvas = ref(null);
+
+    // Staff & Oil Futures
+    const showStaff = ref(false);
+    const showOilFutures = ref(false);
 
     // Gift Animation
     const giftAnimations = ref([]);
@@ -2140,47 +2548,6 @@ createApp({
       setTimeout(() => {
         showLevelUpOverlay.value = false;
       }, 2500);
-    }
-
-    // ============ AI ADVISOR ============
-    const showAiAdvisor = ref(false);
-    const aiAdvices = computed(() => {
-      const assets = getTotalAssets();
-      const level = getLevel(assets);
-      const advices = [];
-
-      if (assets < 1000000) {
-        advices.push({ icon: '💼', text: '建议先工作攒钱，积累第一桶金', action: 'work' });
-        advices.push({ icon: '🛢️', text: '石油投资风险太高，现在不适合', action: 'none' });
-      } else if (assets < 10000000) {
-        advices.push({ icon: '🛢️', text: '可以尝试石油投资，高风险高回报', action: 'invest' });
-        advices.push({ icon: '🏠', text: '考虑购买房产，保值又体面', action: 'shop' });
-      } else if (assets < 100000000) {
-        advices.push({ icon: '🛢️', text: '石油投资是赚大钱的好机会！', action: 'invest' });
-        advices.push({ icon: '🏜️', text: '购买领土，建立领地收入', action: 'territory' });
-      } else if (assets < 1000000000) {
-        advices.push({ icon: '🏜️', text: '领地系统收益很高，多买领土', action: 'territory' });
-        advices.push({ icon: '🤝', text: '慈善捐赠可以获得额外奖励', action: 'charity' });
-      } else {
-        advices.push({ icon: '👑', text: '你已经是土豪了，继续扩大影响力！', action: 'none' });
-        advices.push({ icon: '🏰', text: '购买酋长皇宫，成为真正的领主', action: 'territory' });
-      }
-
-      // Add advice based on daily tasks
-      if (completedTasks.value.length < 3) {
-        advices.push({ icon: '📋', text: '记得完成每日任务，奖励很丰厚！', action: 'tasks' });
-      }
-
-      return advices.slice(0, 3);
-    });
-
-    function handleAiAdvice(advice) {
-      if (advice.action === 'work') activeTab.value = 'home';
-      else if (advice.action === 'invest') activeTab.value = 'home';
-      else if (advice.action === 'shop') view.value = 'shop';
-      else if (advice.action === 'territory') activeTab.value = 'territory';
-      else if (advice.action === 'tasks') activeTab.value = 'tasks';
-      showAiAdvisor.value = false;
     }
 
     // ============ TERRITORY / LORD SYSTEM ============
@@ -2486,6 +2853,126 @@ createApp({
       return ownedItems.value.map(id => getItemById(id)).filter(Boolean);
     });
 
+    // ============ WORK V2.0 COMPUTED ============
+    // Get work level config
+    const currentWorkLevelConfig = computed(() => {
+      return WORK_LEVEL_CONFIG.find(l => l.level === workLevel.value) || WORK_LEVEL_CONFIG[0];
+    });
+
+    // Work level progress
+    const workLevelProgress = computed(() => {
+      const currentConfig = currentWorkLevelConfig.value;
+      const nextConfig = WORK_LEVEL_CONFIG.find(l => l.level === workLevel.value + 1);
+      if (!nextConfig) return 100;
+      return Math.min(100, ((workExp.value - currentConfig.exp) / (nextConfig.exp - currentConfig.exp)) * 100);
+    });
+
+    // Check which works are unlocked based on total assets
+    const availableWorks = computed(() => {
+      const assets = totalAssets.value;
+      return WORK_TYPES_V2.map(w => ({
+        ...w,
+        unlocked: assets >= w.unlock,
+        onCooldown: workCooldowns.value[w.id] && Date.now() < workCooldowns.value[w.id],
+        cooldownRemaining: workCooldowns.value[w.id] ? Math.max(0, Math.ceil((workCooldowns.value[w.id] - Date.now()) / 1000)) : 0,
+      }));
+    });
+
+    // Staff income per second
+    const staffIncomePerSec = computed(() => {
+      let total = 0;
+      for (const [staffId, count] of Object.entries(ownedStaff.value)) {
+        const staff = STAFF_TYPES.find(s => s.id === staffId);
+        if (staff) total += staff.incomePerSec * count;
+      }
+      return total;
+    });
+
+    // Get staff price with inflation (15% increase per owned)
+    const getStaffPrice = (staffId) => {
+      const staff = STAFF_TYPES.find(s => s.id === staffId);
+      if (!staff) return 0;
+      const count = ownedStaff.value[staffId] || 0;
+      return Math.floor(staff.basePrice * Math.pow(1.15, count));
+    };
+
+    // Get staff list for display
+    const ownedStaffList = computed(() => {
+      return STAFF_TYPES.map(s => ({
+        ...s,
+        count: ownedStaff.value[s.id] || 0,
+        price: getStaffPrice(s.id),
+        income: s.incomePerSec * (ownedStaff.value[s.id] || 0),
+      }));
+    });
+
+    // Active contacts with remaining info
+    const activeContactsDisplay = computed(() => {
+      return activeContacts.value.map(c => {
+        const contactDef = CONTACTS.find(ct => ct.id === c.id);
+        return {
+          ...c,
+          name: contactDef?.name || c.id,
+          icon: contactDef?.icon || '❓',
+          desc: contactDef?.desc || '',
+        };
+      });
+    });
+
+    // Combo multiplier display
+    const comboDisplay = computed(() => {
+      if (comboCount.value >= 10) return { count: comboCount.value, multiplier: 2.0, text: '×2.0', active: true, color: '#ff6b6b' };
+      if (comboCount.value >= 3) return { count: comboCount.value, multiplier: 1.5, text: '×1.5', active: true, color: '#ffa500' };
+      return { count: 0, multiplier: 1.0, text: '连击: 0', active: false, color: 'transparent' };
+    });
+
+    // Get work earnings with all multipliers
+    const getWorkEarnings = (workType) => {
+      const work = WORK_TYPES_V2.find(w => w.id === workType);
+      if (!work) return 0;
+
+      let earnings = work.baseEarnings;
+
+      // Apply work level multiplier
+      earnings *= currentWorkLevelConfig.value.multiplier;
+
+      // Apply combo multiplier
+      earnings *= comboDisplay.value.multiplier;
+
+      // Apply contact buffs (only for specific work types)
+      const businessContact = activeContacts.value.find(c => c.buff === 'business_bonus');
+      if (businessContact) earnings *= (1 + businessContact.buffValue);
+
+      return Math.floor(earnings);
+    };
+
+    // Get cooldown for work type (affected by work level)
+    const getWorkCooldown = (workType) => {
+      const work = WORK_TYPES_V2.find(w => w.id === workType);
+      if (!work) return work.cooldown;
+
+      // Lv.3: cooldown -20%, Lv.5: cooldown -50%, Lv.MAX: no cooldown
+      const level = workLevel.value;
+      if (level >= 6) return 0; // Lv.MAX no cooldown
+      if (level >= 5) return Math.floor(work.cooldown * 0.5);
+      if (level >= 3) return Math.floor(work.cooldown * 0.8);
+      return work.cooldown;
+    };
+
+    // Oil futures computed
+    const oilPositionValue = computed(() => {
+      if (!oilPosition.value) return 0;
+      return oilPrice.value;
+    });
+
+    const oilProfitLoss = computed(() => {
+      if (!oilPosition.value || !oilEntryPrice.value) return 0;
+      const diff = oilPrice.value - oilEntryPrice.value;
+      return Math.floor(diff * 1000); // Scale to AED
+    });
+
+    const oilTrendClass = computed(() => oilTrend.value === 1 ? 'up' : 'down');
+
     // ============ METHODS ============
     function showToast(msg, type = '') {
       if (toastTimer) clearTimeout(toastTimer);
@@ -2527,6 +3014,15 @@ createApp({
         lastLikeDate: lastLikeDate.value,
         // Wealth History
         wealthHistory: wealthHistory.value,
+        // Work System V2
+        unlockedWorks: unlockedWorks.value,
+        workCooldowns: workCooldowns.value,
+        workLevel: workLevel.value,
+        workExp: workExp.value,
+        ownedStaff: ownedStaff.value,
+        // Oil Futures
+        oilPosition: oilPosition.value,
+        oilEntryPrice: oilEntryPrice.value,
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
     }
@@ -2573,6 +3069,15 @@ createApp({
         likedFriends.value = new Set(data.likedFriends ?? []);
         lastLikeDate.value = data.lastLikeDate ?? '';
         wealthHistory.value = (data.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
+        // Work System V2
+        unlockedWorks.value = data.unlockedWorks ?? ['carpet'];
+        workCooldowns.value = data.workCooldowns ?? {};
+        workLevel.value = data.workLevel ?? 1;
+        workExp.value = data.workExp ?? 0;
+        ownedStaff.value = data.ownedStaff ?? {};
+        // Oil Futures
+        oilPosition.value = data.oilPosition ?? null;
+        oilEntryPrice.value = data.oilEntryPrice ?? 0;
 
         // Check if signin needs reset (new day)
         const today = new Date().toDateString();
@@ -2588,6 +3093,24 @@ createApp({
       addWealthRecord();
       updateCooldowns();
       cdInterval = setInterval(updateCooldowns, 1000);
+      startStaffIncome();
+      startOilFutures();
+    }
+
+    function startOilFutures() {
+      if (oilInterval) clearInterval(oilInterval);
+      oilInterval = setInterval(() => {
+        // Simulate oil price change
+        const momentum = oilTrend.value;
+        const volatility = 0.02 + Math.random() * 0.03;
+        const change = momentum * volatility * (Math.random() > 0.45 ? 1 : -1);
+        oilPrice.value = Math.max(20, Math.min(200, oilPrice.value * (1 + change)));
+        // Update trend
+        if (Math.random() < 0.3) oilTrend.value = change > 0 ? 1 : -1;
+        // Keep history
+        oilHistory.value.push(oilPrice.value);
+        if (oilHistory.value.length > 100) oilHistory.value.shift();
+      }, 2000);
     }
 
     function updateCooldowns() {
@@ -2609,6 +3132,10 @@ createApp({
       return `${seconds}s`;
     }
 
+    function fmtOilPrice(price) {
+      return price.toFixed(2);
+    }
+
     function doWork() {
       if (!canWork.value) return;
       cash.value += 1000;
@@ -2621,6 +3148,203 @@ createApp({
       checkAchievements();
       save();
       showToast('工作赚了 +1,000 迪拉姆! 💼', 'success');
+    }
+
+    // ============ WORK V2.0 FUNCTIONS ============
+    function doWorkV2(workId, skipLock = false) {
+      // Prevent rapid clicking - 500ms lock (skip for overtime mode)
+      if (!skipLock && workClickLock.value) return;
+      if (!skipLock) {
+        workClickLock.value = true;
+        setTimeout(() => { workClickLock.value = false; }, 500);
+      }
+
+      const work = WORK_TYPES_V2.find(w => w.id === workId);
+      if (!work) return;
+
+      // Check if unlocked
+      if (!unlockedWorks.value.includes(workId)) {
+        showToast('未解锁该工作类型!', 'error');
+        return;
+      }
+
+      // Check cooldown - return if still on cooldown
+      const cd = getWorkCooldown(workId);
+      const cooldownEnd = workCooldowns.value[workId] || 0;
+      if (cd > 0 && Date.now() < cooldownEnd) {
+        return; // Still on cooldown
+      }
+
+      // Calculate earnings
+      const earnings = getWorkEarnings(workId);
+
+      // Apply earnings
+      cash.value += earnings;
+      workCount.value++;
+
+      // Set cooldown AFTER earning (not before!)
+      if (cd > 0) {
+        workCooldowns.value[workId] = Date.now() + cd * 1000;
+      }
+
+      // Add work exp
+      workExp.value++;
+      checkWorkLevelUp();
+
+      // Check for new work unlocks
+      checkWorkUnlocks();
+
+      // Combo system
+      updateCombo();
+
+      // Contact system (15% trigger)
+      triggerContact();
+
+      // Effects
+      addWealthRecord();
+      const comboText = comboDisplay.value.count >= 3 ? ` 🔥×${comboDisplay.value.count}` : '';
+      showFloatingText(`+${fmtFull(earnings)}${comboText}`, 'gain');
+      playSound('coin');
+      checkDailyTasks();
+      checkAchievements();
+      save();
+    }
+
+    function checkWorkLevelUp() {
+      const nextLevel = WORK_LEVEL_CONFIG.find(l => l.level === workLevel.value + 1);
+      if (nextLevel && workExp.value >= nextLevel.exp) {
+        workLevel.value = nextLevel.level;
+        showToast(`打工升级! Lv.${workLevel.value} - ${nextLevel.unlock || ''}`, 'success');
+        playSound('levelup');
+      }
+    }
+
+    function checkWorkUnlocks() {
+      const assets = totalAssets.value;
+      for (const work of WORK_TYPES_V2) {
+        if (assets >= work.unlock && !unlockedWorks.value.includes(work.id)) {
+          unlockedWorks.value.push(work.id);
+          showToast(`新工作解锁: ${work.name}!`, 'success');
+        }
+      }
+    }
+
+    function updateCombo() {
+      const now = Date.now();
+      // If last click was more than 2 seconds ago, reset combo
+      if (lastWorkClick.value && now - lastWorkClick.value > 2000) {
+        comboCount.value = 1; // Reset to 1, not 0
+      } else {
+        comboCount.value++;
+      }
+      lastWorkClick.value = now;
+
+      // Set overtime mode if combo >= 10
+      if (comboCount.value >= 10 && !overtimeMode.value) {
+        startOvertime();
+      }
+    }
+
+    function startOvertime() {
+      overtimeMode.value = true;
+      if (overtimeInterval) clearInterval(overtimeInterval);
+      // Auto-work every second (skip lock for overtime)
+      overtimeInterval = setInterval(() => {
+        if (overtimeMode.value && unlockedWorks.value.length > 0) {
+          // Auto click the highest unlocked work
+          const highestWork = [...availableWorks.value].reverse().find(w => w.unlocked);
+          if (highestWork) {
+            doWorkV2(highestWork.id, true); // skipLock = true
+          }
+        }
+      }, 1000);
+    }
+
+    function stopOvertime() {
+      overtimeMode.value = false;
+      comboCount.value = 0;
+      if (overtimeInterval) {
+        clearInterval(overtimeInterval);
+        overtimeInterval = null;
+      }
+    }
+
+    function triggerContact() {
+      if (Math.random() > 0.15) return; // 15% trigger rate
+
+      // Pick random contact based on probability
+      let roll = Math.random();
+      let cumulative = 0;
+      for (const contact of CONTACTS) {
+        cumulative += contact.probability;
+        if (roll <= cumulative) {
+          // Check if already have this permanent buff
+          const existing = activeContacts.value.find(c => c.id === contact.id);
+          if (existing) {
+            if (existing.permanent) return; // Already have permanent
+            // For non-permanent, can stack up to 3 times (oil baron)
+          }
+
+          const newContact = {
+            id: contact.id,
+            buff: contact.buff,
+            buffValue: contact.buffValue,
+            remaining: contact.permanent ? null : contact.remaining,
+            permanent: contact.permanent || false,
+          };
+
+          // Special handling for mystery merchant - instant reward
+          if (contact.id === 'mystery') {
+            const reward = Math.floor(Math.random() * 99000) + 1000; // 1000-100000
+            cash.value += reward;
+            showFloatingText(`+${fmtFull(reward)} 🎭`, 'gain');
+            playSound('coin');
+            showToast(`神秘商人赠送 ${fmtFull(reward)} AED!`, 'success');
+          } else {
+            activeContacts.value.push(newContact);
+            showToast(`人脉触发: ${contact.name}! ${contact.desc}`, 'success');
+          }
+          break;
+        }
+      }
+    }
+
+    function useContactBuff(contactId) {
+      const idx = activeContacts.value.findIndex(c => c.id === contactId);
+      if (idx < 0) return;
+      const contact = activeContacts.value[idx];
+
+      if (contact.permanent) return;
+
+      contact.remaining--;
+      if (contact.remaining <= 0) {
+        activeContacts.value.splice(idx, 1);
+      }
+    }
+
+    // ============ STAFF FUNCTIONS ============
+    function buyStaff(staffId) {
+      const price = getStaffPrice(staffId);
+      if (cash.value < price) {
+        showToast('现金不够!', 'error');
+        return;
+      }
+      cash.value -= price;
+      ownedStaff.value[staffId] = (ownedStaff.value[staffId] || 0) + 1;
+      totalSpent.value += price;
+      playSound('buy');
+      checkAchievements();
+      save();
+      showToast(`雇佣了员工!`, 'success');
+    }
+
+    function startStaffIncome() {
+      if (staffInterval) clearInterval(staffInterval);
+      staffInterval = setInterval(() => {
+        if (staffIncomePerSec.value > 0) {
+          cash.value += staffIncomePerSec.value;
+        }
+      }, 1000);
     }
 
     function doBusiness() {
@@ -2664,6 +3388,31 @@ createApp({
         modal.value = { type: 'invest-result', won: false, loss };
       }
       checkAchievements();
+    }
+
+    function buyOil(position) {
+      if (oilPosition.value) return;
+      oilPosition.value = position;
+      oilEntryPrice.value = oilPrice.value;
+    }
+
+    function closeOilPosition() {
+      if (!oilPosition.value) return;
+      const profit = oilPosition.value === 'long'
+        ? oilPrice.value - oilEntryPrice.value
+        : oilEntryPrice.value - oilPrice.value;
+      const profitAED = Math.floor(profit * 1000); // Scale to AED
+      if (profitAED >= 0) {
+        cash.value += profitAED;
+        showFloatingText('+' + fmt(profitAED), 'gain');
+      } else {
+        cash.value += profitAED;
+        showFloatingText(fmt(profitAED), 'loss');
+      }
+      oilPosition.value = null;
+      oilEntryPrice.value = 0;
+      addWealthRecord();
+      save();
     }
 
     function checkDailyTasks() {
@@ -3125,7 +3874,7 @@ createApp({
       dailyTaskProgress, allDailyTasksDone, achievementsWithStatus,
       modal, toast, giftFriend, dailyTasksTab,
       showAchievementUnlock,
-      fmt, fmtFull, fmtCD, getLevel,
+      fmt, fmtFull, fmtCD, fmtOilPrice, getLevel,
       currentLang, isRtl, t,
       startGame, goShop, goBack,
       doWork, doBusiness, doInvest,
@@ -3158,8 +3907,19 @@ createApp({
       showLevelUpOverlay, levelUpData,
       // Wealth Chart
       wealthHistory, getWealthChartData,
-      // AI Advisor
-      showAiAdvisor, aiAdvices, handleAiAdvice,
+      // Work System v2
+      workClickLock, showStaff, showOilFutures,
+      workLevel, workExp, comboCount, comboDisplay,
+      availableWorks, workCooldowns, unlockedWorks,
+      currentWorkLevelConfig, workLevelProgress,
+      activeContacts, activeContactsDisplay,
+      getWorkEarnings, getWorkCooldown,
+      doWorkV2, overtimeMode, startOvertime, stopOvertime,
+      // Oil Futures
+      oilPrice, oilTrend, oilPosition, oilEntryPrice, oilProfitLoss, oilPositionValue, oilHistory, oilTrendClass,
+      buyOil, closeOilPosition, startOilFutures,
+      // Staff
+      ownedStaffList, ownedStaff, buyStaff, staffIncomePerSec, getStaffPrice,
     };
   },
   template: `
@@ -3244,45 +4004,63 @@ createApp({
 
     <!-- Tab: Home -->
     <div class="tab-content" v-if="activeTab === 'home'">
-      <div class="section-title">💰 赚钱</div>
-      <div class="earn-grid">
-        <!-- Work -->
-        <div class="earn-btn" :class="{ disabled: !canWork }">
-          <div class="earn-icon">🏢</div>
-          <div class="earn-info">
-            <div class="earn-name">工作</div>
-            <div class="earn-reward">+1,000 AED</div>
-            <div class="earn-cooldown" v-if="!canWork">冷却: {{ fmtCD(workCD) }}</div>
+      <!-- Work System V2.0 -->
+      <div class="work-v2-section">
+        <div class="work-v2-header">
+          <span class="work-v2-level">Lv.{{ workLevel }}</span>
+          <div class="work-v2-exp-bar">
+            <div class="work-v2-exp-fill" :style="{ width: workLevelProgress + '%' }"></div>
           </div>
-          <button class="earn-action" :class="{ 'cooldown-btn': !canWork }" @click="doWork">
-            {{ canWork ? '执行' : fmtCD(workCD) }}
-          </button>
+          <span class="work-v2-exp-text">{{ workExp }}/{{ currentWorkLevelConfig ? currentWorkLevelConfig.exp : 100 }} EXP</span>
         </div>
-
-        <!-- Business -->
-        <div class="earn-btn" :class="{ disabled: !canBusiness }">
-          <div class="earn-icon">🛒</div>
-          <div class="earn-info">
-            <div class="earn-name">做生意</div>
-            <div class="earn-reward">+10,000 AED</div>
-            <div class="earn-cooldown" v-if="!canBusiness">冷却: {{ fmtCD(businessCD) }}</div>
-          </div>
-          <button class="earn-action" :class="{ 'cooldown-btn': !canBusiness }" @click="doBusiness">
-            {{ canBusiness ? '执行' : fmtCD(businessCD) }}
-          </button>
+        <div class="work-v2-combo">
+          <span class="combo-badge" :class="comboDisplay.active ? 'combo-active' : 'combo-inactive'">
+            <span v-if="comboDisplay.active" class="combo-fire">🔥</span>
+            {{ comboDisplay.text }}
+          </span>
+          <span v-if="activeContactsDisplay.length > 0" class="contacts-list">
+            <span v-for="c in activeContactsDisplay" :key="c.id" class="contact-badge active" :title="c.desc">
+              {{ c.icon }} {{ c.buff }}
+            </span>
+          </span>
         </div>
-
-        <!-- Oil Investment -->
-        <div class="earn-btn" :class="{ disabled: !canInvest }">
-          <div class="earn-icon">🛢️</div>
-          <div class="earn-info">
-            <div class="earn-name">石油投资</div>
-            <div class="earn-reward">+1,000,000 AED or -50%</div>
-            <div class="earn-cooldown" v-if="!canInvest">冷却: {{ fmtCD(investCD) }}</div>
+        <div class="work-types-grid">
+          <div v-for="w in availableWorks" :key="w.id"
+            class="work-type-card"
+            :class="{
+              unlocked: w.unlocked && !w.onCooldown,
+              locked: !w.unlocked,
+              'on-cooldown': w.onCooldown
+            }">
+            <div class="work-type-header">
+              <span class="work-type-icon">{{ w.icon }}</span>
+              <div>
+                <div class="work-type-name">{{ w.name }}</div>
+                <div class="work-type-name-en">{{ w.nameEn }}</div>
+              </div>
+            </div>
+            <div class="work-type-earnings">+{{ fmt(w.baseEarnings) }} AED</div>
+            <div class="work-type-cooldown" v-if="w.onCooldown">⏱ {{ w.cooldownRemaining }}s</div>
+            <div class="work-type-unlock" v-if="!w.unlocked">🔒 需要 {{ fmt(w.unlock) }} 资产</div>
+            <button class="work-type-btn"
+              :class="{
+                do: w.unlocked && !w.onCooldown && !workClickLock,
+                locked: !w.unlocked,
+                cooldown: w.onCooldown || workClickLock
+              }"
+              :disabled="!w.unlocked || w.onCooldown || workClickLock"
+              @click="doWorkV2(w.id)">
+              {{ !w.unlocked ? '未解锁' : w.onCooldown ? w.cooldownRemaining + 's' : workClickLock ? '...' : '执行' }}
+            </button>
           </div>
-          <button class="earn-action" :class="{ 'cooldown-btn': !canInvest }" @click="doInvest">
-            {{ canInvest ? '投资!' : fmtCD(investCD) }}
-          </button>
+        </div>
+        <div class="overtime-toggle">
+          <label>⚡ 加班模式 (自动工作)</label>
+          <div class="toggle-switch" :class="{ active: overtimeMode }" @click="overtimeMode ? stopOvertime() : startOvertime()"></div>
+        </div>
+        <div class="work-v2-footer">
+          <button class="work-footer-btn" @click="showStaff = true">👥 员工 ({{ ownedStaffList.length }})</button>
+          <button class="work-footer-btn" @click="showOilFutures = true">🛢️ 石油期货</button>
         </div>
       </div>
 
@@ -3299,33 +4077,6 @@ createApp({
             :data-value="fmt(bar.value)">
           </div>
         </div>
-      </div>
-
-      <!-- AI Advisor -->
-      <div class="ai-advisor-section">
-        <div class="ai-advisor-header">
-          <div class="ai-avatar">🤖</div>
-          <div class="ai-info">
-            <div class="ai-name">AI 投资顾问</div>
-            <div class="ai-status">● 在线</div>
-          </div>
-          <button @click="showAiAdvisor = !showAiAdvisor" style="background:none;border:none;color:var(--gold);font-size:20px;cursor:pointer">
-            {{ showAiAdvisor ? '−' : '+' }}
-          </button>
-        </div>
-        <div v-if="showAiAdvisor" class="ai-advice-list">
-          <div v-if="aiAdvices.length === 0" class="ai-thinking">
-            <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
-            <span>分析中...</span>
-          </div>
-          <div v-for="(advice, idx) in aiAdvices" :key="idx"
-            class="ai-advice-item"
-            @click="handleAiAdvice(advice)">
-            <span class="advice-icon">{{ advice.icon }}</span>
-            {{ advice.text }}
-          </div>
-        </div>
-        <div v-else class="ai-tip">点击展开获取投资建议</div>
       </div>
 
       <!-- Owned Items -->
@@ -3789,6 +4540,74 @@ createApp({
     🏅 获得称号: PK冠军 (24小时)
   </div>
   <button class="close-pk-btn" @click="closePKResult">确定</button>
+</div>
+
+<!-- ========== STAFF MODAL ========== -->
+<div v-if="showStaff" class="modal-overlay" @click.self="showStaff = false">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>👥 员工管理</h3>
+      <button class="modal-close" @click="showStaff = false">×</button>
+    </div>
+    <div class="staff-income" style="text-align:center;margin-bottom:16px;">
+      每秒收入: <span style="color:var(--green)">+{{ fmt(staffIncomePerSec) }} AED/s</span>
+    </div>
+    <div class="staff-list">
+      <div v-for="staff in STAFF_TYPES" :key="staff.id" class="staff-item">
+        <span class="staff-icon">{{ staff.icon }}</span>
+        <div class="staff-info">
+          <div class="staff-name">{{ staff.name }} ({{ staff.nameEn }})</div>
+          <div class="staff-income-rate">+{{ fmt(staff.incomePerSec) }} AED/s</div>
+          <div class="staff-owned" v-if="ownedStaff[staff.id]">已拥有: {{ ownedStaff[staff.id] }}</div>
+        </div>
+        <div>
+          <div class="staff-price">{{ fmt(getStaffPrice(staff.id)) }} AED</div>
+          <button class="staff-buy-btn"
+            :disabled="cash < getStaffPrice(staff.id)"
+            @click="buyStaff(staff.id)">购买</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== OIL FUTURES MODAL ========== -->
+<div v-if="showOilFutures" class="modal-overlay" @click.self="showOilFutures = false">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>🛢️ 石油期货</h3>
+      <button class="modal-close" @click="showOilFutures = false">×</button>
+    </div>
+    <div class="oil-header">
+      <span class="oil-title">当前价格</span>
+      <span class="oil-price" :class="oilTrendClass">\${{ fmtOilPrice(oilPrice) }}</span>
+    </div>
+    <div class="oil-chart">
+      <div v-for="(price, idx) in oilHistory.slice(-30)" :key="idx"
+        class="oil-bar"
+        :class="idx > 0 && price < oilHistory[idx-1] ? 'down' : ''"
+        :style="{ height: oilHistory.length > 0 ? (price / Math.max(...oilHistory.slice(-30), 1) * 100) + '%' : '0%' }">
+      </div>
+    </div>
+    <div class="oil-position">
+      <span>持仓:</span>
+      <span class="position-badge" :class="{
+        'position-long': oilPosition === 'long',
+        'position-short': oilPosition === 'short',
+        'position-none': !oilPosition
+      }">
+        {{ oilPosition === 'long' ? '📈 做多' : oilPosition === 'short' ? '📉 做空' : '无持仓' }}
+      </span>
+      <span v-if="oilPosition && oilProfitLoss !== 0" class="oil-profit" :class="oilProfitLoss >= 0 ? 'positive' : 'negative'">
+        {{ oilProfitLoss >= 0 ? '+' : '' }}{{ fmt(Math.abs(oilProfitLoss)) }} AED
+      </span>
+    </div>
+    <div class="oil-buttons">
+      <button v-if="!oilPosition" class="oil-btn buy" @click="buyOil('long')">📈 做多</button>
+      <button v-if="!oilPosition" class="oil-btn sell" @click="buyOil('short')">📉 做空</button>
+      <button v-if="oilPosition" class="oil-btn close" @click="closeOilPosition">平仓</button>
+    </div>
+  </div>
 </div>
 
   `
