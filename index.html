@@ -2945,7 +2945,7 @@ createApp({
         ...w,
         unlocked: assets >= w.unlock,
         onCooldown: workCooldowns.value[w.id] && currentTime.value < workCooldowns.value[w.id],
-        cooldownRemaining: workCooldowns.value[w.id] ? Math.max(0, Math.ceil((workCooldowns.value[w.id] - currentTime.value) / 1000)) : 0,
+        cooldownRemaining: workCooldowns.value[w.id] ? Math.max(0, Math.floor((workCooldowns.value[w.id] - currentTime.value) / 1000)) : 0,
       }));
     });
 
