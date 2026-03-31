@@ -2034,6 +2034,80 @@ async function saveToFirestore(userId, data) {
     console.error('Firestore 保存失败:', err);
   }
 }
+
+// ============ 排行榜 Firestore ============
+async function saveToLeaderboard(userId, totalWealth) {
+  try {
+    await db.collection('leaderboard').doc('totalWealth').collection('players').doc(userId).set({
+      assets: totalWealth,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (err) {
+    console.error('Leaderboard 保存失败:', err);
+  }
+}
+
+async function loadLeaderboardFromFirestore() {
+  try {
+    const snapshot = await db.collection('leaderboard').doc('totalWealth').collection('players')
+      .orderBy('assets', 'desc').limit(50).get();
+    const cloudLeaders = [];
+    snapshot.forEach(doc => {
+      if (doc.id !== currentUser?.uid) {
+        cloudLeaders.push({ id: doc.id, assets: doc.data().assets });
+      }
+    });
+    return cloudLeaders;
+  } catch (err) {
+    console.error('Leaderboard 读取失败:', err);
+    return [];
+  }
+}
+
+let leaderboardUnsubscribe = null;
+function subscribeLeaderboard(callback) {
+  if (leaderboardUnsubscribe) leaderboardUnsubscribe();
+  try {
+    leaderboardUnsubscribe = db.collection('leaderboard').doc('totalWealth').collection('players')
+      .orderBy('assets', 'desc').limit(50)
+      .onSnapshot(snapshot => {
+        const cloudLeaders = [];
+        snapshot.forEach(doc => {
+          if (doc.id !== currentUser?.uid) {
+            cloudLeaders.push({ id: doc.id, assets: doc.data().assets });
+          }
+        });
+        callback(cloudLeaders);
+      }, err => {
+        console.error('Leaderboard 监听失败:', err);
+      });
+  } catch (err) {
+    console.error('Leaderboard 订阅失败:', err);
+  }
+}
+
+// ============ 好友 Firestore ============
+async function saveFriendToFirestore(userId, friendId, friendData) {
+  try {
+    await db.collection('friends').doc(userId).collection('list').doc(friendId).set(friendData, { merge: true });
+  } catch (err) {
+    console.error('Friend 保存失败:', err);
+  }
+}
+
+async function loadFriendsFromFirestore(userId) {
+  try {
+    const snapshot = await db.collection('friends').doc(userId).collection('list').get();
+    const friendsData = {};
+    snapshot.forEach(doc => {
+      friendsData[doc.id] = doc.data();
+    });
+    return friendsData;
+  } catch (err) {
+    console.error('Friends 读取失败:', err);
+    return {};
+  }
+}
 </script>
 
 <script>
@@ -2384,6 +2458,7 @@ createApp({
     const activeTab = ref('home');
     const shopTab = ref('汽车');
     const lbTab = ref('总资产');
+    const cloudLeaderboard = ref([]); // Firestore 排行榜数据
     const view = ref('home'); // home | shop | friends | leaderboard
     const currentLang = ref('cn'); // cn | en | ar
     const isRtl = computed(() => currentLang.value === 'ar');
@@ -2869,13 +2944,14 @@ createApp({
       }));
     });
 
-    // Leaderboard
+    // Leaderboard - 合并预设+Firestore+玩家自己
     const leaderboard = computed(() => {
       let list = [...PRESET_LEADERS];
-      // Add you
-      const youIdx = list.findIndex(l => l.isYou);
-      if (youIdx >= 0) list.splice(youIdx, 1);
-
+      // 添加云端真实玩家
+      cloudLeaderboard.value.forEach(p => {
+        list.push({ name: '玩家', assets: p.assets, emoji: '👤', isCloud: true });
+      });
+      // 添加你
       list.push({ name: '你', assets: totalAssets.value, emoji: '😎', isYou: true });
 
       // Sort by assets desc
@@ -3099,6 +3175,8 @@ createApp({
       // 同步到 Firestore
       if (currentUser) {
         saveToFirestore(currentUser.uid, data);
+        // 同步到排行榜
+        saveToLeaderboard(currentUser.uid, totalAssets.value);
       }
     }
 
@@ -3163,20 +3241,9 @@ createApp({
     }
 
     async function startGame() {
-      // 先匿名登录 Firebase
-      if (!currentUser) {
-        await signInAnonymously();
-      }
-      if (auth.currentUser) {
-        currentUser = auth.currentUser;
-        // 从 Firestore 加载云端数据
-        const cloudData = await loadFromFirestore(currentUser.uid);
-        if (cloudData) {
-          localStorage.setItem(SAVE_KEY, JSON.stringify(cloudData));
-        }
-      }
-      started.value = true;
+      // 先初始化游戏状态（localStorage 优先）
       load();
+      started.value = true;
       addWealthRecord();
       updateCooldowns();
       cdInterval = setInterval(() => {
@@ -3185,6 +3252,63 @@ createApp({
       }, 1000);
       startStaffIncome();
       startOilFutures();
+
+      // 后台异步加载 Firebase 数据并合并
+      if (typeof firebase !== 'undefined' && firebase.apps.length >= 0) {
+        (async () => {
+          try {
+            if (!currentUser) {
+              await signInAnonymously();
+            }
+            if (auth.currentUser) {
+              currentUser = auth.currentUser;
+              // 订阅排行榜实时更新
+              subscribeLeaderboard((leaders) => {
+                cloudLeaderboard.value = leaders;
+              });
+              const cloudData = await loadFromFirestore(currentUser.uid);
+              if (cloudData) {
+                // 用云端数据覆盖本地状态
+                cash.value = cloudData.cash ?? cash.value;
+                ownedItems.value = cloudData.ownedItems ?? ownedItems.value;
+                lastWorkTime.value = cloudData.lastWorkTime ?? lastWorkTime.value;
+                lastBusinessTime.value = cloudData.lastBusinessTime ?? lastBusinessTime.value;
+                lastInvestTime.value = cloudData.lastInvestTime ?? lastInvestTime.value;
+                playerTitle.value = cloudData.title ?? playerTitle.value;
+                titleExpiry.value = cloudData.titleExpiry ?? titleExpiry.value;
+                ownedTerritories.value = cloudData.ownedTerritories ?? ownedTerritories.value;
+                lastSigninDate.value = cloudData.lastSigninDate ?? lastSigninDate.value;
+                signinHistory.value = cloudData.signinHistory ?? signinHistory.value;
+                charityTotal.value = cloudData.charityTotal ?? charityTotal.value;
+                rentalEnabled.value = cloudData.rentalEnabled ?? rentalEnabled.value;
+                pkWins.value = cloudData.pkWins ?? pkWins.value;
+                totalSpent.value = cloudData.totalSpent ?? totalSpent.value;
+                unlockedAchievements.value = cloudData.unlockedAchievements ?? unlockedAchievements.value;
+                workCount.value = cloudData.workCount ?? workCount.value;
+                businessCount.value = cloudData.businessCount ?? businessCount.value;
+                investCount.value = cloudData.investCount ?? investCount.value;
+                completedTasks.value = cloudData.completedTasks ?? completedTasks.value;
+                lastResetDate.value = cloudData.lastResetDate ?? lastResetDate.value;
+                likedFriends.value = new Set(cloudData.likedFriends ?? []);
+                lastLikeDate.value = cloudData.lastLikeDate ?? lastLikeDate.value;
+                wealthHistory.value = (cloudData.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
+                unlockedWorks.value = cloudData.unlockedWorks ?? unlockedWorks.value;
+                workCooldowns.value = cloudData.workCooldowns ?? workCooldowns.value;
+                workLevel.value = cloudData.workLevel ?? workLevel.value;
+                workExp.value = cloudData.workExp ?? workExp.value;
+                ownedStaff.value = cloudData.ownedStaff ?? ownedStaff.value;
+                oilPosition.value = cloudData.oilPosition ?? oilPosition.value;
+                oilEntryPrice.value = cloudData.oilEntryPrice ?? oilEntryPrice.value;
+                // 立即保存合并后的数据
+                save();
+              }
+            }
+          } catch (e) {
+            console.error('Firebase 加载失败:', e);
+          }
+        })();
+      }
+    }
     }
 
     function startOilFutures() {
@@ -3954,10 +4078,11 @@ createApp({
     onUnmounted(() => {
       if (cdInterval) clearInterval(cdInterval);
       if (toastTimer) clearTimeout(toastTimer);
+      if (leaderboardUnsubscribe) leaderboardUnsubscribe();
     });
 
     return {
-      started, activeTab, shopTab, lbTab, view,
+      started, activeTab, shopTab, lbTab, view, cloudLeaderboard,
       cash, ownedItems, totalAssets, level, nextLevel, levelProgress, displayTitle,
       workCD, businessCD, investCD, canWork, canBusiness, canInvest,
       leaderboard, leaderboardByCategory, friends, ownedItemsList, currentShopItems,
