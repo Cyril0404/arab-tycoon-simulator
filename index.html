@@ -1985,8 +1985,64 @@
 <body>
 <div id="app"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+// Firebase 配置
+const firebaseConfig = {
+  apiKey: "AIzaSyAeB48_4cRhb1AbiGX7JlJ_8wgHU7EEYNs",
+  authDomain: "arab-tycoon-simulator.firebaseapp.com",
+  projectId: "arab-tycoon-simulator",
+  storageBucket: "arab-tycoon-simulator.firebasestorage.app",
+  messagingSenderId: "279009245903",
+  appId: "1:279009245903:web:39b879f3d0c46e020f95ba"
+};
+
+// 初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+let currentUser = null;
+
+// Firebase 匿名登录
+function signInAnonymously() {
+  return auth.signInAnonymously().catch(err => {
+    console.error('Firebase Auth 失败:', err);
+  });
+}
+
+// Firestore 读取用户数据
+async function loadFromFirestore(userId) {
+  try {
+    const doc = await db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      return doc.data();
+    }
+  } catch (err) {
+    console.error('Firestore 读取失败:', err);
+  }
+  return null;
+}
+
+// Firestore 保存用户数据
+async function saveToFirestore(userId, data) {
+  try {
+    await db.collection('users').doc(userId).set(data, { merge: true });
+  } catch (err) {
+    console.error('Firestore 保存失败:', err);
+  }
+}
+</script>
+
 <script>
 const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+
+// Firebase Auth 状态监听（恢复已登录会话）
+auth.onAuthStateChanged((user) => {
+  currentUser = user;
+});
 
 // ============ DATA ============
 const SHOP_DATA = {
@@ -3039,6 +3095,10 @@ createApp({
         oilEntryPrice: oilEntryPrice.value,
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+      // 同步到 Firestore
+      if (currentUser) {
+        saveToFirestore(currentUser.uid, data);
+      }
     }
 
     function load() {
@@ -3101,7 +3161,19 @@ createApp({
       } catch (e) { /* ignore */ }
     }
 
-    function startGame() {
+    async function startGame() {
+      // 先匿名登录 Firebase
+      if (!currentUser) {
+        await signInAnonymously();
+      }
+      if (auth.currentUser) {
+        currentUser = auth.currentUser;
+        // 从 Firestore 加载云端数据
+        const cloudData = await loadFromFirestore(currentUser.uid);
+        if (cloudData) {
+          localStorage.setItem(SAVE_KEY, JSON.stringify(cloudData));
+        }
+      }
       started.value = true;
       load();
       addWealthRecord();
