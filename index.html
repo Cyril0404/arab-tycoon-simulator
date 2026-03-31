@@ -2034,6 +2034,81 @@ async function saveToFirestore(userId, data) {
     console.error('Firestore 保存失败:', err);
   }
 }
+
+// ============ 排行榜 Firestore ============
+async function saveToLeaderboard(userId, totalWealth) {
+  try {
+    await db.collection('leaderboard').doc('totalWealth').collection('players').doc(userId).set({
+      assets: totalWealth,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch (err) {
+    console.error('Leaderboard 保存失败:', err);
+  }
+}
+
+async function loadLeaderboardFromFirestore() {
+  try {
+    const snapshot = await db.collection('leaderboard').doc('totalWealth').collection('players')
+      .orderBy('assets', 'desc').limit(50).get();
+    const cloudLeaders = [];
+    snapshot.forEach(doc => {
+      if (doc.id !== currentUser?.uid) { // 排除自己
+        cloudLeaders.push({ id: doc.id, assets: doc.data().assets });
+      }
+    });
+    return cloudLeaders;
+  } catch (err) {
+    console.error('Leaderboard 读取失败:', err);
+    return [];
+  }
+}
+
+// 排行榜实时监听
+let leaderboardUnsubscribe = null;
+function subscribeLeaderboard(callback) {
+  if (leaderboardUnsubscribe) leaderboardUnsubscribe();
+  try {
+    leaderboardUnsubscribe = db.collection('leaderboard').doc('totalWealth').collection('players')
+      .orderBy('assets', 'desc').limit(50)
+      .onSnapshot(snapshot => {
+        const cloudLeaders = [];
+        snapshot.forEach(doc => {
+          if (doc.id !== currentUser?.uid) {
+            cloudLeaders.push({ id: doc.id, assets: doc.data().assets });
+          }
+        });
+        callback(cloudLeaders);
+      }, err => {
+        console.error('Leaderboard 监听失败:', err);
+      });
+  } catch (err) {
+    console.error('Leaderboard 订阅失败:', err);
+  }
+}
+
+// ============ 好友 Firestore ============
+async function saveFriendToFirestore(userId, friendId, friendData) {
+  try {
+    await db.collection('friends').doc(userId).collection('list').doc(friendId).set(friendData, { merge: true });
+  } catch (err) {
+    console.error('Friend 保存失败:', err);
+  }
+}
+
+async function loadFriendsFromFirestore(userId) {
+  try {
+    const snapshot = await db.collection('friends').doc(userId).collection('list').get();
+    const friendsData = {};
+    snapshot.forEach(doc => {
+      friendsData[doc.id] = doc.data();
+    });
+    return friendsData;
+  } catch (err) {
+    console.error('Friends 读取失败:', err);
+    return {};
+  }
+}
 </script>
 
 <script>
@@ -2384,6 +2459,7 @@ createApp({
     const activeTab = ref('home');
     const shopTab = ref('汽车');
     const lbTab = ref('总资产');
+    const cloudLeaderboard = ref([]); // Firestore 排行榜数据
     const view = ref('home'); // home | shop | friends | leaderboard
     const currentLang = ref('cn'); // cn | en | ar
     const isRtl = computed(() => currentLang.value === 'ar');
@@ -2869,13 +2945,14 @@ createApp({
       }));
     });
 
-    // Leaderboard
+    // Leaderboard - 合并预设+Firestore+玩家自己
     const leaderboard = computed(() => {
       let list = [...PRESET_LEADERS];
-      // Add you
-      const youIdx = list.findIndex(l => l.isYou);
-      if (youIdx >= 0) list.splice(youIdx, 1);
-
+      // 添加云端真实玩家
+      cloudLeaderboard.value.forEach(p => {
+        list.push({ name: '玩家', assets: p.assets, emoji: '👤', isCloud: true });
+      });
+      // 添加你
       list.push({ name: '你', assets: totalAssets.value, emoji: '😎', isYou: true });
 
       // Sort by assets desc
@@ -3099,6 +3176,8 @@ createApp({
       // 同步到 Firestore
       if (currentUser) {
         saveToFirestore(currentUser.uid, data);
+        // 同步到排行榜
+        saveToLeaderboard(currentUser.uid, totalAssets.value);
       }
     }
 
@@ -3184,6 +3263,10 @@ createApp({
             }
             if (auth.currentUser) {
               currentUser = auth.currentUser;
+              // 订阅排行榜实时更新
+              subscribeLeaderboard((leaders) => {
+                cloudLeaderboard.value = leaders;
+              });
               const cloudData = await loadFromFirestore(currentUser.uid);
               if (cloudData) {
                 // 用云端数据覆盖本地状态
@@ -3995,10 +4078,11 @@ createApp({
     onUnmounted(() => {
       if (cdInterval) clearInterval(cdInterval);
       if (toastTimer) clearTimeout(toastTimer);
+      if (leaderboardUnsubscribe) leaderboardUnsubscribe();
     });
 
     return {
-      started, activeTab, shopTab, lbTab, view,
+      started, activeTab, shopTab, lbTab, view, cloudLeaderboard,
       cash, ownedItems, totalAssets, level, nextLevel, levelProgress, displayTitle,
       workCD, businessCD, investCD, canWork, canBusiness, canInvest,
       leaderboard, leaderboardByCategory, friends, ownedItemsList, currentShopItems,
