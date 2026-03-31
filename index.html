@@ -3169,14 +3169,52 @@ createApp({
       }
       if (auth.currentUser) {
         currentUser = auth.currentUser;
-        // 从 Firestore 加载云端数据
+        // 从 Firestore 加载云端数据，直接覆盖响应式变量
         const cloudData = await loadFromFirestore(currentUser.uid);
         if (cloudData) {
+          // 直接用云端数据覆盖本地状态
+          cash.value = cloudData.cash ?? 1000;
+          ownedItems.value = cloudData.ownedItems ?? [];
+          lastWorkTime.value = cloudData.lastWorkTime ?? 0;
+          lastBusinessTime.value = cloudData.lastBusinessTime ?? 0;
+          lastInvestTime.value = cloudData.lastInvestTime ?? 0;
+          playerTitle.value = cloudData.title ?? '';
+          titleExpiry.value = cloudData.titleExpiry ?? 0;
+          ownedTerritories.value = cloudData.ownedTerritories ?? [];
+          lastSigninDate.value = cloudData.lastSigninDate ?? '';
+          signinHistory.value = cloudData.signinHistory ?? [];
+          charityTotal.value = cloudData.charityTotal ?? 0;
+          rentalEnabled.value = cloudData.rentalEnabled ?? true;
+          pkWins.value = cloudData.pkWins ?? 0;
+          totalSpent.value = cloudData.totalSpent ?? 0;
+          unlockedAchievements.value = cloudData.unlockedAchievements ?? [];
+          workCount.value = cloudData.workCount ?? 0;
+          businessCount.value = cloudData.businessCount ?? 0;
+          investCount.value = cloudData.investCount ?? 0;
+          completedTasks.value = cloudData.completedTasks ?? [];
+          lastResetDate.value = cloudData.lastResetDate ?? '';
+          likedFriends.value = new Set(cloudData.likedFriends ?? []);
+          lastLikeDate.value = cloudData.lastLikeDate ?? '';
+          wealthHistory.value = (cloudData.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
+          unlockedWorks.value = cloudData.unlockedWorks ?? ['carpet'];
+          workCooldowns.value = cloudData.workCooldowns ?? {};
+          workLevel.value = cloudData.workLevel ?? 1;
+          workExp.value = cloudData.workExp ?? 0;
+          ownedStaff.value = cloudData.ownedStaff ?? {};
+          oilPosition.value = cloudData.oilPosition ?? null;
+          oilEntryPrice.value = cloudData.oilEntryPrice ?? 0;
+
+          // 同步到 localStorage 作为备份
           localStorage.setItem(SAVE_KEY, JSON.stringify(cloudData));
+        } else {
+          // 无云端数据，尝试从 localStorage 恢复
+          load();
         }
+      } else {
+        // 未登录，直接用 localStorage
+        load();
       }
       started.value = true;
-      load();
       addWealthRecord();
       updateCooldowns();
       cdInterval = setInterval(() => {
