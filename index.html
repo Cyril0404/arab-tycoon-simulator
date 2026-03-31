@@ -3163,57 +3163,8 @@ createApp({
     }
 
     async function startGame() {
-      // 先匿名登录 Firebase
-      if (!currentUser) {
-        await signInAnonymously();
-      }
-      if (auth.currentUser) {
-        currentUser = auth.currentUser;
-        // 从 Firestore 加载云端数据，直接覆盖响应式变量
-        const cloudData = await loadFromFirestore(currentUser.uid);
-        if (cloudData) {
-          // 直接用云端数据覆盖本地状态
-          cash.value = cloudData.cash ?? 1000;
-          ownedItems.value = cloudData.ownedItems ?? [];
-          lastWorkTime.value = cloudData.lastWorkTime ?? 0;
-          lastBusinessTime.value = cloudData.lastBusinessTime ?? 0;
-          lastInvestTime.value = cloudData.lastInvestTime ?? 0;
-          playerTitle.value = cloudData.title ?? '';
-          titleExpiry.value = cloudData.titleExpiry ?? 0;
-          ownedTerritories.value = cloudData.ownedTerritories ?? [];
-          lastSigninDate.value = cloudData.lastSigninDate ?? '';
-          signinHistory.value = cloudData.signinHistory ?? [];
-          charityTotal.value = cloudData.charityTotal ?? 0;
-          rentalEnabled.value = cloudData.rentalEnabled ?? true;
-          pkWins.value = cloudData.pkWins ?? 0;
-          totalSpent.value = cloudData.totalSpent ?? 0;
-          unlockedAchievements.value = cloudData.unlockedAchievements ?? [];
-          workCount.value = cloudData.workCount ?? 0;
-          businessCount.value = cloudData.businessCount ?? 0;
-          investCount.value = cloudData.investCount ?? 0;
-          completedTasks.value = cloudData.completedTasks ?? [];
-          lastResetDate.value = cloudData.lastResetDate ?? '';
-          likedFriends.value = new Set(cloudData.likedFriends ?? []);
-          lastLikeDate.value = cloudData.lastLikeDate ?? '';
-          wealthHistory.value = (cloudData.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
-          unlockedWorks.value = cloudData.unlockedWorks ?? ['carpet'];
-          workCooldowns.value = cloudData.workCooldowns ?? {};
-          workLevel.value = cloudData.workLevel ?? 1;
-          workExp.value = cloudData.workExp ?? 0;
-          ownedStaff.value = cloudData.ownedStaff ?? {};
-          oilPosition.value = cloudData.oilPosition ?? null;
-          oilEntryPrice.value = cloudData.oilEntryPrice ?? 0;
-
-          // 同步到 localStorage 作为备份
-          localStorage.setItem(SAVE_KEY, JSON.stringify(cloudData));
-        } else {
-          // 无云端数据，尝试从 localStorage 恢复
-          load();
-        }
-      } else {
-        // 未登录，直接用 localStorage
-        load();
-      }
+      // 先初始化游戏状态（localStorage 优先）
+      load();
       started.value = true;
       addWealthRecord();
       updateCooldowns();
@@ -3223,6 +3174,58 @@ createApp({
       }, 1000);
       startStaffIncome();
       startOilFutures();
+
+      // 后台异步加载 Firebase 数据并合并
+      if (typeof firebase !== 'undefined' && firebase.apps.length >= 0) {
+        (async () => {
+          try {
+            if (!currentUser) {
+              await signInAnonymously();
+            }
+            if (auth.currentUser) {
+              currentUser = auth.currentUser;
+              const cloudData = await loadFromFirestore(currentUser.uid);
+              if (cloudData) {
+                // 用云端数据覆盖本地状态
+                cash.value = cloudData.cash ?? cash.value;
+                ownedItems.value = cloudData.ownedItems ?? ownedItems.value;
+                lastWorkTime.value = cloudData.lastWorkTime ?? lastWorkTime.value;
+                lastBusinessTime.value = cloudData.lastBusinessTime ?? lastBusinessTime.value;
+                lastInvestTime.value = cloudData.lastInvestTime ?? lastInvestTime.value;
+                playerTitle.value = cloudData.title ?? playerTitle.value;
+                titleExpiry.value = cloudData.titleExpiry ?? titleExpiry.value;
+                ownedTerritories.value = cloudData.ownedTerritories ?? ownedTerritories.value;
+                lastSigninDate.value = cloudData.lastSigninDate ?? lastSigninDate.value;
+                signinHistory.value = cloudData.signinHistory ?? signinHistory.value;
+                charityTotal.value = cloudData.charityTotal ?? charityTotal.value;
+                rentalEnabled.value = cloudData.rentalEnabled ?? rentalEnabled.value;
+                pkWins.value = cloudData.pkWins ?? pkWins.value;
+                totalSpent.value = cloudData.totalSpent ?? totalSpent.value;
+                unlockedAchievements.value = cloudData.unlockedAchievements ?? unlockedAchievements.value;
+                workCount.value = cloudData.workCount ?? workCount.value;
+                businessCount.value = cloudData.businessCount ?? businessCount.value;
+                investCount.value = cloudData.investCount ?? investCount.value;
+                completedTasks.value = cloudData.completedTasks ?? completedTasks.value;
+                lastResetDate.value = cloudData.lastResetDate ?? lastResetDate.value;
+                likedFriends.value = new Set(cloudData.likedFriends ?? []);
+                lastLikeDate.value = cloudData.lastLikeDate ?? lastLikeDate.value;
+                wealthHistory.value = (cloudData.wealthHistory || []).map(r => ({ ...r, time: new Date(r.time) }));
+                unlockedWorks.value = cloudData.unlockedWorks ?? unlockedWorks.value;
+                workCooldowns.value = cloudData.workCooldowns ?? workCooldowns.value;
+                workLevel.value = cloudData.workLevel ?? workLevel.value;
+                workExp.value = cloudData.workExp ?? workExp.value;
+                ownedStaff.value = cloudData.ownedStaff ?? ownedStaff.value;
+                oilPosition.value = cloudData.oilPosition ?? oilPosition.value;
+                oilEntryPrice.value = cloudData.oilEntryPrice ?? oilEntryPrice.value;
+                // 立即保存合并后的数据
+                save();
+              }
+            }
+          } catch (e) {
+            console.error('Firebase 加载失败:', e);
+          }
+        })();
+      }
     }
 
     function startOilFutures() {
