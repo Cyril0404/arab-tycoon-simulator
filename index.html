@@ -2414,6 +2414,7 @@ createApp({
     const businessCD = ref(0);
     const investCD = ref(0);
     let cdInterval = null;
+    const currentTime = ref(Date.now()); // 心跳驱动倒计时刷新
 
     // Gift selection
     const giftFriend = ref(null);
@@ -2943,8 +2944,8 @@ createApp({
       return WORK_TYPES_V2.map(w => ({
         ...w,
         unlocked: assets >= w.unlock,
-        onCooldown: workCooldowns.value[w.id] && Date.now() < workCooldowns.value[w.id],
-        cooldownRemaining: workCooldowns.value[w.id] ? Math.max(0, Math.ceil((workCooldowns.value[w.id] - Date.now()) / 1000)) : 0,
+        onCooldown: workCooldowns.value[w.id] && currentTime.value < workCooldowns.value[w.id],
+        cooldownRemaining: workCooldowns.value[w.id] ? Math.max(0, Math.ceil((workCooldowns.value[w.id] - currentTime.value) / 1000)) : 0,
       }));
     });
 
@@ -3178,7 +3179,10 @@ createApp({
       load();
       addWealthRecord();
       updateCooldowns();
-      cdInterval = setInterval(updateCooldowns, 1000);
+      cdInterval = setInterval(() => {
+        currentTime.value = Date.now();
+        updateCooldowns();
+      }, 1000);
       startStaffIncome();
       startOilFutures();
     }
