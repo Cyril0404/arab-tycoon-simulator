@@ -2487,12 +2487,6 @@ createApp({
       return LANG_DATA[currentLang.value]?.[key] || LANG_DATA['cn'][key] || key;
     };
 
-    // ============ 分享裂变 - URL参数解析 ============
-    const getReferrerFromURL = () => {
-      const urlParams = new URLSearchParams(location.search);
-      return urlParams.get('ref');
-    };
-
     // Player data
     const cash = ref(1000);
     const ownedItems = ref([]);
@@ -2539,11 +2533,6 @@ createApp({
     const doubleEarningsEndTime = ref(0); // 双倍收益结束时间戳
     const newcomerPackOpened = ref(false); // 是否已开启新手礼包
     const showNewcomerPack = ref(false); // 显示新手礼包弹窗
-
-    // ============ 分享裂变系统 ============
-    const referrer = ref(null); // 邀请人UID
-    const referralRewards = ref(0); // 邀请奖励总额
-    const firstWorkDone = ref(false); // 是否已完成首次打工
 
     // Combo system
     const comboCount = ref(0);
@@ -3235,10 +3224,6 @@ createApp({
         quickFinishTickets: quickFinishTickets.value,
         doubleEarningsEndTime: doubleEarningsEndTime.value,
         newcomerPackOpened: newcomerPackOpened.value,
-        // 分享裂变
-        referrer: referrer.value,
-        referralRewards: referralRewards.value,
-        firstWorkDone: firstWorkDone.value,
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
       // 同步到 Firestore
@@ -3304,10 +3289,6 @@ createApp({
         quickFinishTickets.value = data.quickFinishTickets ?? 0;
         doubleEarningsEndTime.value = data.doubleEarningsEndTime ?? 0;
         newcomerPackOpened.value = data.newcomerPackOpened ?? false;
-        // 分享裂变
-        referrer.value = data.referrer ?? null;
-        referralRewards.value = data.referralRewards ?? 0;
-        firstWorkDone.value = data.firstWorkDone ?? false;
 
         // Check if signin needs reset (new day)
         const today = new Date().toDateString();
@@ -3318,20 +3299,8 @@ createApp({
     }
 
     async function startGame() {
-      // 检查 URL 是否有邀请码
-      const urlReferrer = getReferrerFromURL();
-      if (urlReferrer) {
-        localStorage.setItem('referrer', urlReferrer);
-      }
-
       // 先初始化游戏状态（localStorage 优先）
       load();
-
-      // 如果 URL 有邀请码且本地没有记录，使用 URL 的邀请码
-      if (urlReferrer && !referrer.value) {
-        referrer.value = urlReferrer;
-      }
-
       started.value = true;
 
       // 检查是否需要显示新手礼包
@@ -3359,16 +3328,6 @@ createApp({
             }
             if (auth.currentUser) {
               currentUser = auth.currentUser;
-              // 如果有邀请人，记录邀请关系到 Firestore
-              if (referrer.value) {
-                try {
-                  await db.collection('users').doc(currentUser.uid).set({
-                    referrer: referrer.value,
-                    firstWorkDone: false,
-                    referralRewards: 0
-                  }, { merge: true });
-                } catch (e) { /* ignore */ }
-              }
               // 订阅排行榜实时更新
               subscribeLeaderboard((leaders) => {
                 cloudLeaderboard.value = leaders;
@@ -3410,17 +3369,6 @@ createApp({
                 quickFinishTickets.value = cloudData.quickFinishTickets ?? quickFinishTickets.value;
                 doubleEarningsEndTime.value = cloudData.doubleEarningsEndTime ?? doubleEarningsEndTime.value;
                 newcomerPackOpened.value = cloudData.newcomerPackOpened ?? newcomerPackOpened.value;
-                // 分享裂变
-                referrer.value = cloudData.referrer ?? referrer.value;
-                referralRewards.value = cloudData.referralRewards ?? referralRewards.value;
-                firstWorkDone.value = cloudData.firstWorkDone ?? firstWorkDone.value;
-                // 如果是新用户且有邀请人，记录邀请关系
-                if (!cloudData.firstWorkDone && referrer.value) {
-                  // 给新用户发放邀请奖励 +100k AED
-                  cash.value += 100000;
-                  showToast('🎁 邀请奖励 +100,000 AED！', 'success');
-                  addWealthRecord();
-                }
                 // 立即保存合并后的数据
                 save();
               }
@@ -3548,38 +3496,6 @@ createApp({
 
       // Check for new work unlocks
       checkWorkUnlocks();
-
-      // ============ 分享裂变 - 首次打工奖励 ============
-      if (!firstWorkDone.value && referrer.value) {
-        firstWorkDone.value = true;
-        // 给邀请人 +100k AED
-        (async () => {
-          try {
-            await db.runTransaction(async (transaction) => {
-              const referrerDoc = await transaction.get(
-                db.collection('users').doc(referrer.value)
-              );
-              const referrerData = referrerDoc.data() || {};
-              const newRewards = (referrerData.referralRewards || 0) + 100000;
-              const newCash = (referrerData.cash || 0) + 100000;
-              const newTotalWealth = (referrerData.totalWealth || 0) + 100000;
-              transaction.update(
-                db.collection('users').doc(referrer.value),
-                {
-                  cash: newCash,
-                  totalWealth: newTotalWealth,
-                  referralRewards: newRewards
-                }
-              );
-            });
-            // 更新排行榜
-            await saveToLeaderboard(referrer.value, (await loadFromFirestore(referrer.value))?.totalWealth || 0);
-          } catch (e) {
-            console.error('邀请奖励发放失败:', e);
-          }
-        })();
-        showToast('🎁 邀请奖励已发放给好友！+100,000 AED', 'success');
-      }
 
       // Combo system
       updateCombo();
@@ -3950,39 +3866,6 @@ createApp({
       setTimeout(() => generatePoster(), 100);
     }
 
-    // ============ 分享裂变 - 邀请链接 ============
-    function shareInviteLink() {
-      if (!currentUser) {
-        showToast('请先登录游戏', 'error');
-        return;
-      }
-      const inviteLink = `${location.origin}${location.pathname}?ref=${currentUser.uid}`;
-      // 复制到剪贴板
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(inviteLink).then(() => {
-          showToast('邀请链接已复制！分享给好友赚100k AED 📤', 'success');
-        }).catch(() => {
-          // Fallback
-          const input = document.createElement('input');
-          input.value = inviteLink;
-          document.body.appendChild(input);
-          input.select();
-          document.execCommand('copy');
-          document.body.removeChild(input);
-          showToast('邀请链接已复制！分享给好友赚100k AED 📤', 'success');
-        });
-      } else {
-        // Fallback for older browsers
-        const input = document.createElement('input');
-        input.value = inviteLink;
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        showToast('邀请链接已复制！分享给好友赚100k AED 📤', 'success');
-      }
-    }
-
     function generatePoster() {
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
@@ -4302,7 +4185,7 @@ createApp({
       confirmInvest,
       buyItem, confirmBuy,
       visitFriend, openGift, sendGift, pkFriend,
-      openSharePoster, downloadPoster, shareToWhatsApp, shareInviteLink,
+      openSharePoster, downloadPoster, shareToWhatsApp,
       sendGiftAnim,
       openMultiplayerPK, startPKMatch, closePKResult,
       showSharePoster, posterCanvas,
@@ -4323,8 +4206,6 @@ createApp({
       // Sound System
       soundEnabled, toggleSound, handleTap, openNewcomerPack,
       quickFinishTickets, doubleEarningsEndTime, newcomerPackOpened, showNewcomerPack,
-      // 分享裂变
-      referrer, referralRewards, firstWorkDone,
       // Floating Text
       floatingTexts,
       // Level Up Overlay
@@ -4371,7 +4252,6 @@ createApp({
         <button :class="'lang-btn ' + (currentLang === 'en' ? 'active' : '')" @click="currentLang = 'en'">EN</button>
         <button :class="'lang-btn ' + (currentLang === 'ar' ? 'active' : '')" @click="currentLang = 'ar'">ع</button>
         <button class="lang-btn" @click="openSharePoster" title="分享海报">📤</button>
-        <button class="lang-btn" @click="shareInviteLink" title="邀请好友">👥</button>
       </div>
       <button class="sound-toggle" :class="{ muted: !soundEnabled }" @click="toggleSound" :title="soundEnabled ? '音效ON' : '音效OFF'">
         {{ soundEnabled ? '🔊' : '🔇' }}
