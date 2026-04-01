@@ -256,3 +256,172 @@
 
 *文档版本: v2.0（代码同步版）*
 *最后更新: 2026-03-30*
+
+---
+
+## 11. 分享裂变系统 (P0 - 待实现)
+
+### 功能概述
+用户分享专属链接给好友，好友通过链接注册并完成首次打工后，分享人获得100k AED奖励。
+
+### 分享链接格式
+```
+https://arabtycoon.top/?ref=USER_UID
+```
+
+### 奖励机制
+| 角色 | 奖励 | 条件 |
+|------|------|------|
+| 新用户 | +100k AED | 通过邀请链接注册 |
+| 邀请人 | +100k AED | 被邀请人首次打工完成 |
+
+### Firestore 数据结构新增字段
+```
+users/{uid}
+  - referrer: string | null   // 邀请人UID
+  - referralCount: number   // 已邀请人数
+  - referralRewards: number   // 邀请奖励总额
+  - firstWorkDone: boolean    // 是否完成首次打工
+```
+
+### 技术实现
+
+**1. URL参数解析 (index.html 启动时)**
+```javascript
+const urlParams = new URLSearchParams(location.search);
+const referrer = urlParams.get('ref');
+if (referrer) {
+  localStorage.setItem('referrer', referrer);
+}
+```
+
+**2. 注册时记录邀请关系**
+```javascript
+// Firebase匿名登录后
+const referrer = localStorage.getItem('referrer');
+if (referrer) {
+  await db.collection('users').doc(uid).set({
+    ...userData,
+    referrer: referrer,
+    firstWorkDone: false
+  }, { merge: true });
+}
+```
+
+**3. 打工完成时触发邀请奖励**
+```javascript
+async function completeWork(workId) {
+  // ... 打工逻辑 ...
+  
+  // 检查是否首次打工完成
+  const userDoc = await db.collection('users').doc(currentUser.uid).get();
+  const userData = userDoc.data();
+  
+  if (userData.referrer && !userData.firstWorkDone) {
+    // 给被邀请人标记首次打工完成
+    await db.collection('users').doc(currentUser.uid).update({
+      firstWorkDone: true
+    });
+    
+    // Firestore事务：给邀请人+100k AED
+    await db.runTransaction(async (transaction) => {
+      const referrerDoc = await transaction.get(
+        db.collection('users').doc(userData.referrer)
+      );
+      const referrerData = referrerDoc.data();
+      transaction.update(
+        db.collection('users').doc(userData.referrer),
+        {
+          'wealth.cash': referrerData.wealth.cash + 100000,
+          'wealth.totalWealth': referrerData.wealth.totalWealth + 100000,
+          referralRewards: (referrerData.referralRewards || 0) + 100000
+        }
+      );
+    });
+  }
+}
+```
+
+### 分享按钮UI
+- 位置：主界面顶部/设置页面
+- 文案："邀请好友赚100k AED"
+- 点击生成带ref参数的分享链接
+- 支持复制链接/直接分享到WhatsApp
+
+---
+
+## 12. 早期留存优化 (P1 - 待实现)
+
+### 12.1 新手礼包
+
+**触发条件：** 首次注册后自动弹出（仅一次）
+
+**礼包内容：**
+| 物品 | 数量 | 效果 |
+|------|------|------|
+| 快速完成券 | 3张 | 打工秒完成（无冷却） |
+| 双倍收益 | 10分钟 | 打工收益×2 |
+| 新手大礼包 | 1个 | 打开获得随机物品 |
+
+**UI设计：**
+- 启动后弹出全屏礼包动画
+- 金色边框 + 开启按钮
+- 开启后展示获得的物品
+
+### 12.2 快速完成券
+
+**使用流程：**
+1. 用户点击打工
+2. 检查是否有快速完成券
+3. 有券 → 弹窗"使用快速完成券立即完成？"
+4. 确认 → 立即完成打工，券-1
+5. 无券 → 正常进入60秒冷却
+
+**数据结构新增：**
+```javascript
+users/{uid}
+  - quickFinishTickets: number  // 快速完成券数量
+  - doubleEarningsEndTime: number | null  // 双倍收益结束时间戳
+  - newcomerPackOpened: boolean  // 是否已开启新手礼包
+```
+
+**打工收益计算：**
+```javascript
+function calculateWorkEarnings(workId) {
+  let earnings = WORKS[workId].earnings;
+  
+  // 检查双倍收益buff
+  if (Date.now() < userData.doubleEarningsEndTime) {
+    earnings *= 2;
+  }
+  
+  return earnings;
+}
+```
+
+### 12.3 打工冷却时的替代玩法
+
+**方案A：沙漠刮刮卡**
+- 打工冷却期间可玩刮刮卡
+- 每次刮卡消耗100 AED
+- 中奖率30%，奖励50-500 AED
+- 目的：打发等待时间，增加互动
+
+**方案B：猜拳小游戏**
+- 与NPC猜拳
+- 胜利获得50 AED
+- 失败消耗0 AED
+- 每天限10次
+
+---
+
+## 13. 实施优先级
+
+| 功能 | 工作量 | 价值 | 状态 |
+|------|--------|------|------|
+| 分享裂变（完整链路） | 中 | 🔥🔥🔥 | 待实现 |
+| 新手礼包UI | 小 | 🔥🔥 | 待实现 |
+| 快速完成券 | 小 | 🔥🔥 | 待实现 |
+| 双倍收益Buff | 小 | 🔥 | 待实现 |
+| 沙漠刮刮卡 | 中 | 🔥 | 待实现 |
+| 每日任务系统 | 中 | 🔥🔥 | 待实现 |
