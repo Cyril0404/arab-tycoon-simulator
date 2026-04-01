@@ -4,6 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>阿拉伯土豪模拟器</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏰</text></svg>">
+  <meta name="description" content="从1,000迪拉姆起步，成为中东最有钱的人！一款超好玩的阿拉伯风格放置点击游戏">
+  <meta name="keywords" content="土豪,模拟器,迪拜,放置游戏,点击游戏,阿拉伯,有钱,致富">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cyril0404.github.io/arab-tycoon-simulator/">
+  <meta property="og:title" content="阿拉伯土豪模拟器 🏰💰">
+  <meta property="og:description" content="从1,000迪拉姆起步，成为中东最有钱的人！">
+  <meta property="og:image" content="https://cyril0404.github.io/arab-tycoon-simulator/icon.svg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://cyril0404.github.io/arab-tycoon-simulator/">
+  <meta name="twitter:title" content="阿拉伯土豪模拟器 🏰💰">
+  <meta name="twitter:description" content="从1,000迪拉姆起步，成为中东最有钱的人！">
+  <meta name="twitter:image" content="https://cyril0404.github.io/arab-tycoon-simulator/icon.svg">
+
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
@@ -2588,6 +2606,13 @@ createApp({
     let audioCtx = null;
     const soundEnabled = ref(true);
 
+    // 震动反馈
+    function vibrate(ms = 10) {
+      if (navigator.vibrate) {
+        navigator.vibrate(ms);
+      }
+    }
+
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2604,6 +2629,13 @@ createApp({
         gain.connect(audioCtx.destination);
 
         switch (type) {
+          case 'click':
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+            break;
           case 'coin':
             osc.frequency.setValueAtTime(800, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
@@ -2671,6 +2703,12 @@ createApp({
 
     function toggleSound() {
       soundEnabled.value = !soundEnabled.value;
+    }
+
+    // 触控反馈：音效+震动
+    function handleTap() {
+      playSound('click');
+      vibrate(10);
     }
 
     // ============ FLOATING TEXT EFFECTS ============
@@ -4115,7 +4153,7 @@ createApp({
       // Fixed Gifts
       fixedGifts: FIXED_GIFTS,
       // Sound System
-      soundEnabled, toggleSound,
+      soundEnabled, toggleSound, handleTap,
       // Floating Text
       floatingTexts,
       // Level Up Overlay
@@ -4143,7 +4181,7 @@ createApp({
   <div class="start-logo">🏰</div>
   <div class="start-title">阿拉伯土豪<br>模拟器</div>
   <div class="start-sub">从1,000迪拉姆起步<br>成为中东最有钱的人！</div>
-  <button class="btn-gold" @click="startGame">开始游戏</button>
+  <button class="btn-gold" @click="handleTap(); startGame">开始游戏</button>
 </div>
 
 <!-- ========== GAME SCREEN ========== -->
@@ -4210,11 +4248,11 @@ createApp({
 
     <!-- Tabs -->
     <div class="tabs">
-      <div :class="'tab ' + (activeTab === 'home' ? 'active' : '')" @click="activeTab = 'home'">主页</div>
-      <div :class="'tab ' + (activeTab === 'leaderboard' ? 'active' : '')" @click="activeTab = 'leaderboard'">排行榜</div>
-      <div :class="'tab ' + (activeTab === 'friends' ? 'active' : '')" @click="activeTab = 'friends'">好友</div>
-      <div :class="'tab ' + (activeTab === 'tasks' ? 'active' : '')" @click="activeTab = 'tasks'">任务</div>
-      <div :class="'tab ' + (activeTab === 'territory' ? 'active' : '')" @click="activeTab = 'territory'">领主</div>
+      <div :class="'tab ' + (activeTab === 'home' ? 'active' : '')" @click="handleTap(); activeTab = 'home'">主页</div>
+      <div :class="'tab ' + (activeTab === 'leaderboard' ? 'active' : '')" @click="handleTap(); activeTab = 'leaderboard'">排行榜</div>
+      <div :class="'tab ' + (activeTab === 'friends' ? 'active' : '')" @click="handleTap(); activeTab = 'friends'">好友</div>
+      <div :class="'tab ' + (activeTab === 'tasks' ? 'active' : '')" @click="handleTap(); activeTab = 'tasks'">任务</div>
+      <div :class="'tab ' + (activeTab === 'territory' ? 'active' : '')" @click="handleTap(); activeTab = 'territory'">领主</div>
     </div>
 
     <!-- Tab: Home -->
@@ -4264,7 +4302,7 @@ createApp({
                 cooldown: w.onCooldown || workClickLock
               }"
               :disabled="!w.unlocked || w.onCooldown || workClickLock"
-              @click="doWorkV2(w.id)">
+              @click="handleTap(); doWorkV2(w.id)">
               {{ !w.unlocked ? '未解锁' : w.onCooldown ? w.cooldownRemaining + 's' : workClickLock ? '...' : '执行' }}
             </button>
           </div>
@@ -4367,7 +4405,7 @@ createApp({
       <div class="lb-tabs">
         <div v-for="cat in ['总资产','汽车','房产','宠物','奢侈品']" :key="cat"
           :class="'lb-tab ' + (lbTab === cat ? 'active' : '')"
-          @click="lbTab = cat">{{ cat }}</div>
+          @click="handleTap(); lbTab = cat">{{ cat }}</div>
       </div>
       <div class="lb-list">
         <div v-for="row in leaderboardByCategory" :key="row.name" class="lb-row" :class="{ 'is-you': row.isYou }">
@@ -4426,8 +4464,8 @@ createApp({
     <!-- Tab: Tasks & Achievements -->
     <div class="tab-content" v-if="activeTab === 'tasks'">
       <div class="tabs" style="margin-bottom:15px">
-        <div :class="'lb-tab ' + (dailyTasksTab === 'tasks' ? 'active' : '')" @click="dailyTasksTab = 'tasks'">每日任务</div>
-        <div :class="'lb-tab ' + (dailyTasksTab === 'achievements' ? 'active' : '')" @click="dailyTasksTab = 'achievements'">成就</div>
+        <div :class="'lb-tab ' + (dailyTasksTab === 'tasks' ? 'active' : '')" @click="handleTap(); dailyTasksTab = 'tasks'">每日任务</div>
+        <div :class="'lb-tab ' + (dailyTasksTab === 'achievements' ? 'active' : '')" @click="handleTap(); dailyTasksTab = 'achievements'">成就</div>
       </div>
 
       <!-- Daily Tasks -->
@@ -4493,8 +4531,8 @@ createApp({
 
       <!-- Territory Tabs -->
       <div class="tabs" style="margin-bottom:15px">
-        <div :class="'lb-tab ' + (territoriesTab === 'territories' ? 'active' : '')" @click="territoriesTab = 'territories'">领土</div>
-        <div :class="'lb-tab ' + (territoriesTab === 'ranks' ? 'active' : '')" @click="territoriesTab = 'ranks'">领主称号</div>
+        <div :class="'lb-tab ' + (territoriesTab === 'territories' ? 'active' : '')" @click="handleTap(); territoriesTab = 'territories'">领土</div>
+        <div :class="'lb-tab ' + (territoriesTab === 'ranks' ? 'active' : '')" @click="handleTap(); territoriesTab = 'ranks'">领主称号</div>
       </div>
 
       <!-- Territory Grid -->
@@ -4536,7 +4574,7 @@ createApp({
     <div style="display:flex;justify-content:center;gap:10px;margin-bottom:15px;flex-wrap:wrap">
       <span v-for="cat in ['汽车','房产','宠物','奢侈品']" :key="cat"
         :style="shopTab === cat ? 'padding:5px 12px;background:#D4AF37;color:#000;border-radius:20px;cursor:pointer' : 'padding:5px 12px;background:#333;color:#fff;border-radius:20px;cursor:pointer'"
-        @click="shopTab = cat">{{ cat }}</span>
+        @click="handleTap(); shopTab = cat">{{ cat }}</span>
     </div>
     <div>
       <div v-for="item in currentShopItems" :key="item.id" style="background:#1e1a14;padding:12px;margin:8px 0;border-radius:10px;display:flex;align-items:center;gap:10px">
@@ -4591,7 +4629,7 @@ createApp({
     <div class="modal-text">购买 <strong>{{ modal.item.name }}</strong><br>价格 <strong style="color:var(--gold)">{{ fmtFull(modal.item.price) }} 迪拉姆</strong>？</div>
     <div class="modal-btns">
       <button class="modal-btn modal-btn-cancel" @click="modal = null">取消</button>
-      <button class="modal-btn modal-btn-confirm" @click="confirmBuy">购买</button>
+      <button class="modal-btn modal-btn-confirm" @click="handleTap(); confirmBuy">购买</button>
     </div>
   </div>
 
