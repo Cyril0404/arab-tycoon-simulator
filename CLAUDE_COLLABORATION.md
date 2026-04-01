@@ -65,6 +65,8 @@ git push origin main → GitHub Pages自动部署 → 测试WhatsApp打开
 | 7 | UI阿拉伯语RTL适配 | ⬜ | 从右到左布局 |
 | 8 | GitHub Pages部署 | ✅ | 已上线 |
 | 9 | 打工倒计时刷新修复 | ✅ | 2026-04-01修复 |
+| 10 | 触控反馈（音效+震动） | ✅ | 2026-04-01 |
+| 11 | SEO链接预览优化 | ✅ | 2026-04-01 |
 
 ### 上线语言要求
 - **中文**：隐藏（保留源码，方便以后加新内容）
@@ -108,10 +110,18 @@ git push origin main → GitHub Pages自动部署 → 测试WhatsApp打开
 
 **push 的 commit**：
 ```
+a0f3a7e feat: 触控反馈(音效+震动)+SEO链接预览优化
 36073a2 fix: Firebase改为后台异步加载，确保游戏启动不阻塞
 7829ff4 feat: 排行榜Firebase接入 - Firestore实时排行+玩家数据同步
 46918cb fix: 打工倒计时从61s改为60s - Math.ceil改为Math.floor
 e12ed6e fix: 打工倒计时不刷新问题 - 添加currentTime心跳驱动availableWorks重算
 d910fec feat: 接入Firebase匿名登录+Firestore云端存档
 ```
+
+### 2026-04-01 触控反馈+SEO优化
+
+**完成功能**：
+- 触控反馈：点击按钮播放音效 + 手机震动
+- SEO：Open Graph + Twitter Card meta 标签
+- SVG 图标文件
 
