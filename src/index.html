@@ -2019,13 +2019,22 @@ const firebaseConfig = {
 };
 
 // 初始化 Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+let db = null;
+let auth = null;
 let currentUser = null;
+try {
+  if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    auth = firebase.auth();
+  }
+} catch (e) {
+  console.warn('Firebase 初始化失败，游戏将以离线模式运行:', e);
+}
 
 // Firebase 匿名登录
 function signInAnonymously() {
+  if (!auth) return Promise.reject('Firebase auth not initialized');
   return auth.signInAnonymously().catch(err => {
     console.error('Firebase Auth 失败:', err);
   });
@@ -2033,6 +2042,7 @@ function signInAnonymously() {
 
 // Firestore 读取用户数据
 async function loadFromFirestore(userId) {
+  if (!db) return null;
   try {
     const doc = await db.collection('users').doc(userId).get();
     if (doc.exists) {
@@ -2046,6 +2056,7 @@ async function loadFromFirestore(userId) {
 
 // Firestore 保存用户数据
 async function saveToFirestore(userId, data) {
+  if (!db) return;
   try {
     await db.collection('users').doc(userId).set(data, { merge: true });
   } catch (err) {
@@ -2055,6 +2066,7 @@ async function saveToFirestore(userId, data) {
 
 // ============ 排行榜 Firestore ============
 async function saveToLeaderboard(userId, totalWealth) {
+  if (!db) return;
   try {
     await db.collection('leaderboard').doc('totalWealth').collection('players').doc(userId).set({
       assets: totalWealth,
@@ -2066,6 +2078,7 @@ async function saveToLeaderboard(userId, totalWealth) {
 }
 
 async function loadLeaderboardFromFirestore() {
+  if (!db) return [];
   try {
     const snapshot = await db.collection('leaderboard').doc('totalWealth').collection('players')
       .orderBy('assets', 'desc').limit(50).get();
@@ -2085,6 +2098,7 @@ async function loadLeaderboardFromFirestore() {
 // 排行榜实时监听
 let leaderboardUnsubscribe = null;
 function subscribeLeaderboard(callback) {
+  if (!db) return;
   if (leaderboardUnsubscribe) leaderboardUnsubscribe();
   try {
     leaderboardUnsubscribe = db.collection('leaderboard').doc('totalWealth').collection('players')
@@ -2107,6 +2121,7 @@ function subscribeLeaderboard(callback) {
 
 // ============ 好友 Firestore ============
 async function saveFriendToFirestore(userId, friendId, friendData) {
+  if (!db) return;
   try {
     await db.collection('friends').doc(userId).collection('list').doc(friendId).set(friendData, { merge: true });
   } catch (err) {
@@ -3320,7 +3335,7 @@ createApp({
       startOilFutures();
 
       // 后台异步加载 Firebase 数据并合并
-      if (typeof firebase !== 'undefined' && firebase.apps.length >= 0) {
+      if (typeof firebase !== 'undefined' && firebase.apps.length >= 0 && db && auth) {
         (async () => {
           try {
             if (!currentUser) {
