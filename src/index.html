@@ -2511,6 +2511,79 @@ createApp({
     const playerTitle = ref('');
     const titleExpiry = ref(0);
 
+    // ============ 身份等级系统 ============
+    const totalEarnings = ref(0); // 累计收入
+    const playerRank = ref(1); // 1-6 等级
+
+    // 等级名称定义
+    const RANK_NAMES = [
+      { id: 1, name: '打工者', nameEn: 'Worker', icon: '👷', requirement: '默认', desc: '刚来迪拜的打工人' },
+      { id: 2, name: '小老板', nameEn: 'Small Boss', icon: '🧔', requirement: '累计收入50万AED', desc: '小有积蓄的创业者' },
+      { id: 3, name: '有车族', nameEn: 'Car Owner', icon: '🚗', requirement: '购买任意车辆', desc: '有车一族' },
+      { id: 4, name: '房产大亨', nameEn: 'Property Tycoon', icon: '🏠', requirement: '购买任意房产', desc: '坐拥多套房产' },
+      { id: 5, name: '沙漠领主', nameEn: 'Desert Lord', icon: '🏜️', requirement: '拥有3块沙漠领土', desc: '沙漠霸主' },
+      { id: 6, name: '石油国王', nameEn: 'Oil King', icon: '🛢️', requirement: '资产突破1亿AED', desc: '富可敌国' }
+    ];
+
+    // 检查并更新玩家等级
+    function checkPlayerRank() {
+      const assets = totalAssets.value;
+      const prevRank = playerRank.value;
+      let newRank = 1;
+
+      // 等级6：资产突破1亿 AED
+      if (assets >= 100000000) {
+        newRank = 6;
+      }
+      // 等级5：拥有3块沙漠领土
+      else if (getOwnedTerritoriesCount() >= 3) {
+        newRank = 5;
+      }
+      // 等级4：购买任意房产
+      else if (hasAnyProperty()) {
+        newRank = 4;
+      }
+      // 等级3：购买任意车辆
+      else if (hasAnyCar()) {
+        newRank = 3;
+      }
+      // 等级2：累计收入达50万 AED
+      else if (totalEarnings.value >= 500000) {
+        newRank = 2;
+      }
+      // 等级1：打工者（默认）
+
+      if (newRank > prevRank) {
+        playerRank.value = newRank;
+        const rankInfo = RANK_NAMES[newRank - 1];
+        showToast(`🎉 恭喜升级为【${rankInfo.icon} ${rankInfo.name}】！`, 'success');
+        playSound('levelup');
+      }
+    }
+
+    // 检查是否拥有任意车辆
+    function hasAnyCar() {
+      const carIds = ITEMS.cars.map(c => c.id);
+      return ownedItems.value.some(id => carIds.includes(id));
+    }
+
+    // 检查是否拥有任意房产
+    function hasAnyProperty() {
+      const propIds = ITEMS.homes.map(p => p.id);
+      return ownedItems.value.some(id => propIds.includes(id));
+    }
+
+    // 获取拥有的领土数量
+    function getOwnedTerritoriesCount() {
+      // 假设领土相关ID以 terr_ 开头
+      return ownedItems.value.filter(id => id.startsWith('terr_')).length;
+    }
+
+    // 获取当前等级信息
+    function getCurrentRank() {
+      return RANK_NAMES[playerRank.value - 1];
+    }
+
     // Modal
     const modal = ref(null); // { type, ... }
 
@@ -3146,6 +3219,18 @@ createApp({
       // Apply combo multiplier
       earnings *= comboDisplay.value.multiplier;
 
+      // ============ 收入速度加成（资产加成）============
+      let incomeBonusPercent = 0;
+      if (hasAnyCar()) incomeBonusPercent += 10; // 任意车辆 +10%
+      if (hasAnyProperty()) incomeBonusPercent += 15; // 任意房产 +15%
+      // 沙漠领土（假设ID以 terr_ 开头）
+      if (getOwnedTerritoriesCount() > 0) incomeBonusPercent += 20; // +20%
+      // 石油相关物品（假设ID以 oil_ 开头）
+      if (ownedItems.value.some(id => id.startsWith('oil_'))) incomeBonusPercent += 30; // +30%
+      if (incomeBonusPercent > 0) {
+        earnings *= (1 + incomeBonusPercent / 100);
+      }
+
       // Apply contact buffs (only for specific work types)
       const businessContact = activeContacts.value.find(c => c.buff === 'business_bonus');
       if (businessContact) earnings *= (1 + businessContact.buffValue);
@@ -3397,14 +3482,15 @@ createApp({
 
     function openNewcomerPack() {
       // 发放新手礼包
-      quickFinishTickets.value += 3;
-      doubleEarningsEndTime.value = Date.now() + 10 * 60 * 1000; // 10分钟双倍
-      cash.value += 10000;
+      quickFinishTickets.value += 3; // 快速完成券 ×3
+      // 随机获得100-500 AED
+      const bonusCash = Math.floor(Math.random() * 401) + 100; // 100-500
+      cash.value += bonusCash;
       newcomerPackOpened.value = true;
       showNewcomerPack.value = false;
       addWealthRecord();
       save();
-      showToast('🎁 新手礼包已领取！零花钱 +10,000 AED', 'success');
+      showToast(`🎁 新手礼包已领取！零花钱 +${bonusCash} AED`, 'success');
     }
 
     function startOilFutures() {
@@ -3494,7 +3580,22 @@ createApp({
       }
 
       // Calculate earnings
-      const earnings = getWorkEarnings(workId);
+      let earnings = getWorkEarnings(workId);
+
+      // ============ 打工暴击系统（5%概率×3倍）============
+      let isCritical = false;
+      if (Math.random() < 0.05) {
+        earnings *= 3;
+        isCritical = true;
+        showToast('💥 CRITICAL HIT! ×3', 'success');
+        playSound('levelup');
+      }
+
+      // 累计收入更新
+      totalEarnings.value += earnings;
+
+      // 检查等级升级
+      checkPlayerRank();
 
       // Apply earnings
       cash.value += earnings;
@@ -3521,8 +3622,9 @@ createApp({
       // Effects
       addWealthRecord();
       const comboText = comboDisplay.value.count >= 3 ? ` 🔥×${comboDisplay.value.count}` : '';
-      showFloatingText(`+${fmtFull(earnings)}${comboText}`, 'gain');
-      playSound('coin');
+      const critText = isCritical ? ' 💥×3' : '';
+      showFloatingText(`+${fmtFull(earnings)}${comboText}${critText}`, isCritical ? 'critical' : 'gain');
+      playSound(isCritical ? 'levelup' : 'coin');
       checkDailyTasks();
       checkAchievements();
       save();
@@ -3820,6 +3922,8 @@ createApp({
       totalSpent.value += item.price;
       ownedItems.value.push(item.id);
       addWealthRecord();
+      // 检查等级变化（购买物品可能触发等级提升）
+      checkPlayerRank();
       showFloatingText('-' + fmtFull(item.price), 'loss');
       playSound('buy');
       save();
@@ -4188,6 +4292,8 @@ createApp({
     return {
       started, activeTab, shopTab, lbTab, view, cloudLeaderboard,
       cash, ownedItems, totalAssets, level, nextLevel, levelProgress, displayTitle,
+      // 身份等级系统
+      playerRank, getCurrentRank, RANK_NAMES, totalEarnings, checkPlayerRank,
       workCD, businessCD, investCD, canWork, canBusiness, canInvest,
       leaderboard, leaderboardByCategory, friends, ownedItemsList, currentShopItems,
       dailyTaskProgress, allDailyTasksDone, achievementsWithStatus,
