@@ -1573,6 +1573,7 @@
     }
     .float-text.gain { color: var(--green); }
     .float-text.loss { color: #f44336; }
+    .float-text.critical { color: #FFD700; font-size: 24px; text-shadow: 0 0 10px #FFD700, 0 0 20px #FFA500; }
     @keyframes floatUp {
       0% { opacity: 1; transform: translateY(0) scale(1); }
       100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
@@ -4188,6 +4189,7 @@ createApp({
     return {
       started, activeTab, shopTab, lbTab, view, cloudLeaderboard,
       cash, ownedItems, totalAssets, level, nextLevel, levelProgress, displayTitle,
+      identity, playerIdentity, totalIncomeEarned, // CC Enhanced Identity System
       workCD, businessCD, investCD, canWork, canBusiness, canInvest,
       leaderboard, leaderboardByCategory, friends, ownedItemsList, currentShopItems,
       dailyTaskProgress, allDailyTasksDone, achievementsWithStatus,
@@ -4282,8 +4284,8 @@ createApp({
         </div>
         <div style="text-align:right">
           <div class="status-label">身份</div>
-          <span :class="'identity-badge ' + level.class">
-            {{ level.name }}{{ level.name === 'Middle East King' ? ' 👑' : '' }}
+          <span :class="'identity-badge ' + identity.class">
+            {{ identity.nameCn }}{{ identity.id === 6 ? ' 👑' : '' }}
           </span>
         </div>
       </div>
